@@ -1,0 +1,150 @@
+/**
+ * Quill Editor 공통 스타일
+ */
+
+/* 툴바 및 컨테이너 기본 스타일 */
+.ql-toolbar {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px 4px 0 0;
+}
+
+.ql-container {
+  border: 1px solid #dee2e6;
+  border-radius: 0 0 4px 4px;
+  font-size: 14px;
+}
+
+.ql-editor {
+  min-height: 400px;
+}
+
+/* 한글 글꼴 스타일 - 맑은 고딕 */
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="malgun-gothic"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="malgun-gothic"]::before {
+  content: '맑은 고딕';
+  font-family: 'Malgun Gothic', sans-serif;
+}
+
+/* 한글 글꼴 스타일 - 나눔고딕 */
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanum-gothic"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanum-gothic"]::before {
+  content: '나눔고딕';
+  font-family: 'Nanum Gothic', sans-serif;
+}
+
+/* 한글 글꼴 스타일 - Noto Sans KR */
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="noto-sans"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="noto-sans"]::before {
+  content: 'Noto Sans KR';
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* 에디터 내부 글꼴 적용 - 맑은 고딕 */
+.ql-font-malgun-gothic {
+  font-family: 'Malgun Gothic', sans-serif;
+}
+
+/* 에디터 내부 글꼴 적용 - 나눔고딕 */
+.ql-font-nanum-gothic {
+  font-family: 'Nanum Gothic', sans-serif;
+}
+
+/* 에디터 내부 글꼴 적용 - Noto Sans KR */
+.ql-font-noto-sans {
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* 글자 크기 스타일 */
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="10px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before {
+  content: '10px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="12px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before {
+  content: '12px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="14px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before {
+  content: '14px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="16px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before {
+  content: '16px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="18px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before {
+  content: '18px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="20px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="20px"]::before {
+  content: '20px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="24px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before {
+  content: '24px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="28px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="28px"]::before {
+  content: '28px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="32px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before {
+  content: '32px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="36px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="36px"]::before {
+  content: '36px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="48px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="48px"]::before {
+  content: '48px';
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="72px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="72px"]::before {
+  content: '72px';
+}
+
+/* 에디터 내부 글자 크기 적용 */
+.ql-size-10px {
+  font-size: 10px;
+}
+.ql-size-12px {
+  font-size: 12px;
+}
+.ql-size-14px {
+  font-size: 14px;
+}
+.ql-size-16px {
+  font-size: 16px;
+}
+.ql-size-18px {
+  font-size: 18px;
+}
+.ql-size-20px {
+  font-size: 20px;
+}
+.ql-size-24px {
+  font-size: 24px;
+}
+.ql-size-28px {
+  font-size: 28px;
+}
+.ql-size-32px {
+  font-size: 32px;
+}
+.ql-size-36px {
+  font-size: 36px;
+}
+.ql-size-48px {
+  font-size: 48px;
+}
+.ql-size-72px {
+  font-size: 72px;
+}
+
+/* 이미지 리사이즈 스타일 */
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+}

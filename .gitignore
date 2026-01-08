@@ -1,0 +1,36 @@
+# Build outputs
+target/
+*.war
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Application config (keep templates only)
+application-local.yml
+application-prod.yml
+
+# Uploads
+/src/main/resources/static/uploads/*
+!/src/main/resources/static/uploads/.gitkeep
+
+# Temporary files
+*.tmp
+*.swp
+*~

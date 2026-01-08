@@ -1,0 +1,16 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/elang_camp?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Seoul&tinyInt1isBit=false
+    username: elang
+    password: elang1234
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  flyway:
+    enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  elang-camp (Clean Rebuild)
+  목표
+   - Spring Boot 3 + Maven + JSP + jQuery
+   - /ko, /en 공개 페이지 + /admin CMS(레이아웃/메뉴/배너) 관리
+   - 로컬(MariaDB)에서 바로 실행 → 추후 Cafe24(Tomcat 10 + MariaDB 10.1.x)로 WAR 배포
+
+  DB(Flyway) 정책
+   - Flyway는 "실행할 때마다 지우고 다시 만드는" 도구가 아닙니다.
+     flyway_schema_history에 적용 이력을 남기고, "새 migration"만 추가로 적용합니다.
+   - DB 자체(elang_camp) 생성은 로컬/호스팅에서 1회 만들어줘야 합니다.
+     로컬은 scripts/local-db-init.sql 제공.
+
+  Java
+   - Cafe24 사양(예: OpenJDK 17)에 맞춰 Java 17 고정
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.6</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.elang</groupId>
+  <artifactId>elang-camp</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>war</packaging>
+
+  <name>elang-camp</name>
+
+  <properties>
+    <java.version>17</java.version>
+    <flyway.version>11.20.0</flyway.version>
+    <!--
+      ✅ Lombok 버전 고정
+      - IDE(특히 최신 IntelliJ/JBR)에서 번들 JDK/Javac 버전이 올라가면
+        Lombok 내부가 javac API와 맞지 않아 아래와 같은 오류가 발생하는 케이스가 있습니다.
+          java.lang.ExceptionInInitializerError
+          com.sun.tools.javac.code.TypeTag :: UNKNOWN
+      - 이 프로젝트는 Java 17 타깃이며, Lombok도 최신 안정 버전으로 고정합니다.
+    -->
+    <lombok.version>1.18.42</lombok.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.tomcat.embed</groupId>
+      <artifactId>tomcat-embed-jasper</artifactId>
+    </dependency>
+
+      <dependency>
+          <groupId>jakarta.servlet.jsp.jstl</groupId>
+          <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+          <version>3.0.0</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.glassfish.web</groupId>
+          <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+          <version>3.0.1</version>
+      </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+      <version>${flyway.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-mysql</artifactId>
+      <version>${flyway.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mariadb.jdbc</groupId>
+      <artifactId>mariadb-java-client</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!--
+        ✅ Lombok + Javac 호환성 고정
+        - IDE/CI 환경에서 어떤 Javac을 쓰더라도 Lombok 애노테이션 프로세서 버전이
+          ${lombok.version}으로 일관되게 적용되도록 명시합니다.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <release>${java.version}</release>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>com.elang.camp.ElangCampApplication</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -1,0 +1,24 @@
+/* public.css */
+body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color:#111827; }
+.container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.site-header, .site-footer { background:#111827; color:#fff; }
+.site-header .container, .site-footer .container { display:flex; justify-content:space-between; align-items:center; padding: 16px; }
+.site-header .brand { font-weight:800; }
+.lang-switch { color:#fff; text-decoration:none; border:1px solid rgba(255,255,255,.4); padding:6px 10px; border-radius:8px; }
+.site-nav { border-bottom:1px solid #e5e7eb; background:#fff; position:sticky; top:0; }
+.site-nav ul { list-style:none; margin:0; padding:12px 0; display:flex; gap:16px; }
+.site-nav a { text-decoration:none; color:#111827; }
+.hero { padding: 28px 0; }
+.hero h1 { margin:0 0 10px; font-size:34px; }
+.hero .sub { color:#6b7280; margin:0 0 16px; }
+.btn { display:inline-block; padding:10px 14px; border-radius:10px; background:#2563eb; color:#fff; text-decoration:none; }
+.banner-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.banner-card { border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; background:#fff; }
+.banner-card img { width:100%; height:180px; object-fit:cover; display:block; }
+.banner-card .video { aspect-ratio: 16 / 9; }
+.banner-card iframe { width:100%; height:100%; }
+.banner-card .caption { padding:10px; }
+.banner-card .title { font-weight:700; font-size:14px; }
+@media (max-width: 900px) {
+  .banner-grid { grid-template-columns: 1fr; }
+}

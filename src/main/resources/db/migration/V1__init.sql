@@ -1,0 +1,38 @@
+CREATE TABLE IF NOT EXISTS site_layout (
+  lang        VARCHAR(2)  NOT NULL,
+  header_html LONGTEXT    NOT NULL,
+  footer_html LONGTEXT    NOT NULL,
+  updated_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (lang)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS site_menu (
+  id         BIGINT NOT NULL AUTO_INCREMENT,
+  lang       VARCHAR(2)  NOT NULL,
+  label      VARCHAR(64) NOT NULL,
+  href       VARCHAR(255) NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  enabled    TINYINT(1) NOT NULL DEFAULT 1,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_menu_lang (lang),
+  KEY idx_menu_lang_sort (lang, sort_order, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS site_banner (
+  id          BIGINT NOT NULL AUTO_INCREMENT,
+  lang        VARCHAR(2) NOT NULL,
+  title       VARCHAR(128) NOT NULL DEFAULT '',
+  type        VARCHAR(16) NOT NULL,
+  image_url   VARCHAR(1024) NULL,
+  youtube_url VARCHAR(1024) NULL,
+  link_url    VARCHAR(1024) NULL,
+  sort_order  INT NOT NULL DEFAULT 0,
+  enabled     TINYINT(1) NOT NULL DEFAULT 1,
+  updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_banner_lang (lang),
+  KEY idx_banner_lang_sort (lang, sort_order, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

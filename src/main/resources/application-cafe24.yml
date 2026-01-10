@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    # Cafe24 접속 정보
+    url: jdbc:mariadb://localhost:3306/hyojunkim9096?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Seoul
+    username: hyojunkim9096
+    password: Q1w2e3r4t5!@
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      # 운영 환경에서는 validate 또는 none을 사용하는 것이 안전합니다.
+      # validate: 엔티티와 테이블이 올바르게 매핑되었는지 검사
+      ddl-auto: validate
+  flyway:
+    # Cafe24 배포 시에는 Flyway를 활성화하여 DB 마이그레이션을 자동 수행합니다.
+    enabled: true
+
+# 운영 환경에서는 로그 레벨을 info로 설정하는 것이 일반적입니다.
+logging:
+  level:
+    root: info
+    com.elang.camp: info
+
+# Cafe24 서버 환경에 맞는 파일 업로드 경로 설정
+app:
+  upload-dir: /home/hosting_users/hyojunkim9096/uploads/

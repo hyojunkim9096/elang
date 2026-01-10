@@ -26,7 +26,8 @@ public class FileUploadController {
 
     private final AttachFileService attachFileService;
 
-    @Value("${file.upload.path:src/main/resources/static/uploads}")
+    // application.yml 또는 활성화된 프로필의 yml 파일에서 'app.upload-dir' 값을 주입받습니다.
+    @Value("${app.upload-dir}")
     private String uploadPath;
 
     /**
@@ -62,13 +63,13 @@ public class FileUploadController {
             String savedFilename = UUID.randomUUID().toString() + extension;
 
             // 업로드 디렉토리 생성
-            File uploadDir = new File(uploadPath);
+            File uploadDir = new File(this.uploadPath);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
 
             // 파일 저장
-            Path filePath = Paths.get(uploadPath, savedFilename);
+            Path filePath = Paths.get(this.uploadPath, savedFilename);
             Files.write(filePath, file.getBytes());
 
             // DB에 파일 정보 저장

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import com.elang.camp.domain.cms.board.BoardCategoryService;
 import com.elang.camp.domain.cms.board.BoardPostService;
 import com.elang.camp.domain.cms.board.dto.BoardCategoryRes;
-import com.elang.camp.domain.cms.board.dto.BoardCategoryUpsertReq;
 import com.elang.camp.domain.cms.board.dto.BoardPostRes;
 import com.elang.camp.domain.cms.board.dto.BoardPostUpsertReq;
 import com.elang.camp.domain.cms.content.ContentPageService;
@@ -14,21 +13,24 @@ import com.elang.camp.domain.cms.content.ContentCategoryService;
 import com.elang.camp.domain.cms.content.dto.ContentPageRes;
 import com.elang.camp.domain.cms.content.dto.ContentPageUpsertReq;
 import com.elang.camp.domain.cms.content.dto.ContentCategoryRes;
-import com.elang.camp.domain.cms.content.dto.ContentCategoryUpsertReq;
 import com.elang.camp.domain.cms.banner.SiteBannerService;
 import com.elang.camp.domain.cms.banner.BannerCategoryService;
 import com.elang.camp.domain.cms.banner.dto.BannerRes;
 import com.elang.camp.domain.cms.banner.dto.BannerUpsertReq;
 import com.elang.camp.domain.cms.banner.dto.BannerCategoryRes;
-import com.elang.camp.domain.cms.banner.dto.BannerCategoryUpsertReq;
 import com.elang.camp.domain.cms.layout.SiteLayoutService;
 import com.elang.camp.domain.cms.layout.dto.LayoutRes;
 import com.elang.camp.domain.cms.layout.dto.LayoutUpdateReq;
 import com.elang.camp.domain.cms.menu.dto.MenuUpsertReq;
+import com.elang.camp.domain.cms.inquiry.InquiryService;
+import com.elang.camp.domain.cms.inquiry.InquiryStatus;
+import com.elang.camp.domain.cms.inquiry.dto.InquiryRes;
+import com.elang.camp.domain.cms.inquiry.dto.InquiryUpdateReq;
 import com.elang.camp.domain.file.AttachFile;
 import com.elang.camp.domain.file.AttachFileService;
 import com.elang.camp.domain.cms.banner.BannerType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -57,10 +59,10 @@ public class AdminPageController {
     private final BannerCategoryService bannerCategoryService;
     private final SiteLayoutService layoutService;
     private final AttachFileService attachFileService;
+    private final InquiryService inquiryService;
 
-    private void addCommonAttributes(Model model, String title, String active) {
-        addCommonAttributes(model, title, active, "ko");
-    }
+    @Value("${app.upload-dir}")
+    private String uploadPath;
 
     private void addCommonAttributes(Model model, String title, String active, String lang) {
         model.addAttribute("title", title);
@@ -94,9 +96,9 @@ public class AdminPageController {
     }
 
     @GetMapping("/admin/layout")
-    public String layout(@RequestParam(required = false) String lang, Model model) {
-        addCommonAttributes(model, "레이아웃 관리", "layout");
-        LayoutRes layoutRes = layoutService.getOrCreate(lang != null ? lang : "ko");
+    public String layout(@RequestParam(required = false, defaultValue = "ko") String lang, Model model) {
+        addCommonAttributes(model, "레이아웃 관리", "layout", lang);
+        LayoutRes layoutRes = layoutService.getOrCreate(lang);
         model.addAttribute("layoutData", layoutRes);
         return "admin/layout/manage";
     }
@@ -111,20 +113,18 @@ public class AdminPageController {
     }
 
     @GetMapping("/admin/menus")
-    public String menus(@RequestParam(required = false) String lang,
-                       @RequestParam(required = false) String menuType,
+    public String menus(@RequestParam(required = false, defaultValue = "ko") String lang,
+                       @RequestParam(required = false, defaultValue = "admin") String menuType,
                        Model model) {
-        addCommonAttributes(model, "메뉴 관리", "menus");
-        String langValue = (lang != null) ? lang : "ko";
-        String menuTypeValue = (menuType != null) ? menuType : "admin";
-        List<MenuRes> menus = menuService.list(langValue, menuTypeValue, false);
+        addCommonAttributes(model, "메뉴 관리", "menus", lang);
+        List<MenuRes> menus = menuService.list(lang, menuType, false);
         model.addAttribute("menus", menus);
         return "admin/menus/list";
     }
 
     @GetMapping("/admin/menus/new")
-    public String newMenu(Model model) {
-        addCommonAttributes(model, "메뉴 추가", "menus");
+    public String newMenu(@RequestParam(required = false, defaultValue = "ko") String lang, Model model) {
+        addCommonAttributes(model, "메뉴 추가", "menus", lang);
         model.addAttribute("menu", null);
         model.addAttribute("isEdit", false);
         List<MenuRes> allMenus = menuService.list(null, false);
@@ -133,8 +133,10 @@ public class AdminPageController {
     }
 
     @GetMapping("/admin/menus/{id}/edit")
-    public String editMenu(@PathVariable Long id, Model model) {
-        addCommonAttributes(model, "메뉴 수정", "menus");
+    public String editMenu(@PathVariable Long id,
+                          @RequestParam(required = false, defaultValue = "ko") String lang,
+                          Model model) {
+        addCommonAttributes(model, "메뉴 수정", "menus", lang);
         MenuRes menu = menuService.list(null, false).stream()
             .filter(m -> m.getId().equals(id))
             .findFirst()
@@ -219,7 +221,7 @@ public class AdminPageController {
                          @RequestParam(required = false) String categoryKey,
                          @RequestParam(required = false, defaultValue = "ko") String lang,
                          Model model) {
-        addCommonAttributes(model, "배너 관리", "banners");
+        addCommonAttributes(model, "배너 관리", "banners", lang);
         model.addAttribute("lang", lang);
 
         if (categoryId != null) {
@@ -242,7 +244,7 @@ public class AdminPageController {
                            @RequestParam String categoryKey,
                            @RequestParam(required = false, defaultValue = "ko") String lang,
                            Model model) {
-        addCommonAttributes(model, "배너 추가", "banners");
+        addCommonAttributes(model, "배너 추가", "banners", lang);
         model.addAttribute("banner", null);
         model.addAttribute("isEdit", false);
         model.addAttribute("categoryId", categoryId);
@@ -257,7 +259,7 @@ public class AdminPageController {
                             @RequestParam String categoryKey,
                             @RequestParam(required = false, defaultValue = "ko") String lang,
                             Model model) {
-        addCommonAttributes(model, "배너 수정", "banners");
+        addCommonAttributes(model, "배너 수정", "banners", lang);
         BannerRes banner = bannerService.list(lang, false).stream()
             .filter(b -> b.getId().equals(id))
             .findFirst()
@@ -288,7 +290,7 @@ public class AdminPageController {
             if (req.getType() == BannerType.IMAGE) {
                 if (bannerFile != null && !bannerFile.isEmpty()) {
                     // 새 파일 업로드
-                    String imageUrl = uploadBannerImage(bannerFile, id != null ? id : null);
+                    String imageUrl = uploadBannerImage(bannerFile, id);
                     req.setUrl(imageUrl);
                 } else if (existingImageUrl != null) {
                     // 기존 이미지 유지
@@ -323,17 +325,16 @@ public class AdminPageController {
         String extension = originalFilename != null && originalFilename.contains(".")
             ? originalFilename.substring(originalFilename.lastIndexOf("."))
             : "";
-        String savedFilename = UUID.randomUUID().toString() + extension;
+        String savedFilename = UUID.randomUUID() + extension;
 
         // 업로드 디렉토리 생성
-        String uploadPath = "src/main/resources/static/uploads";
-        File uploadDir = new File(uploadPath);
+        File uploadDir = new File(this.uploadPath);
         if (!uploadDir.exists()) {
             uploadDir.mkdirs();
         }
 
         // 파일 저장
-        Path filePath = Paths.get(uploadPath, savedFilename);
+        Path filePath = Paths.get(this.uploadPath, savedFilename);
         Files.write(filePath, file.getBytes());
 
         // DB에 파일 정보 저장
@@ -350,7 +351,7 @@ public class AdminPageController {
             attachFile.setReferenceId(bannerId);
         }
 
-        AttachFile saved = attachFileService.save(attachFile);
+        attachFileService.save(attachFile);
 
         return "/uploads/" + savedFilename;
     }
@@ -376,8 +377,9 @@ public class AdminPageController {
     @GetMapping("/admin/content-pages")
     public String contentPages(@RequestParam(required = false) Long categoryId,
                               @RequestParam(required = false) String categoryKey,
+                              @RequestParam(required = false, defaultValue = "ko") String lang,
                               Model model) {
-        addCommonAttributes(model, "컨텐츠 페이지 관리", "content-pages");
+        addCommonAttributes(model, "컨텐츠 페이지 관리", "content-pages", lang);
 
         if (categoryId != null) {
             List<ContentPageRes> pages = contentPageService.listByCategoryId(categoryId);
@@ -385,7 +387,7 @@ public class AdminPageController {
             model.addAttribute("categoryId", categoryId);
             model.addAttribute("categoryKey", categoryKey);
         } else {
-            List<ContentCategoryRes> categories = contentCategoryService.list(null);
+            List<ContentCategoryRes> categories = contentCategoryService.list(lang);
             model.addAttribute("categories", categories);
         }
 
@@ -395,8 +397,9 @@ public class AdminPageController {
     @GetMapping("/admin/content-pages/new")
     public String newContentPage(@RequestParam Long categoryId,
                                  @RequestParam String categoryKey,
+                                 @RequestParam(required = false, defaultValue = "ko") String lang,
                                  Model model) {
-        addCommonAttributes(model, "페이지 생성", "content-pages");
+        addCommonAttributes(model, "페이지 생성", "content-pages", lang);
         model.addAttribute("page", null);
         model.addAttribute("isEdit", false);
         model.addAttribute("categoryId", categoryId);
@@ -408,8 +411,9 @@ public class AdminPageController {
     public String editContentPage(@PathVariable Long id,
                                   @RequestParam Long categoryId,
                                   @RequestParam String categoryKey,
+                                  @RequestParam(required = false, defaultValue = "ko") String lang,
                                   Model model) {
-        addCommonAttributes(model, "페이지 수정", "content-pages");
+        addCommonAttributes(model, "페이지 수정", "content-pages", lang);
         ContentPageRes page = contentPageService.getById(id);
         model.addAttribute("page", page);
         model.addAttribute("isEdit", true);
@@ -450,8 +454,9 @@ public class AdminPageController {
     @GetMapping("/admin/board-posts")
     public String boardPosts(@RequestParam(required = false) Long categoryId,
                            @RequestParam(required = false) String categoryKey,
+                           @RequestParam(required = false, defaultValue = "ko") String lang,
                            Model model) {
-        addCommonAttributes(model, "게시글 관리", "board-posts");
+        addCommonAttributes(model, "게시글 관리", "board-posts", lang);
 
         log.debug("Board posts page accessed - categoryId: {}, categoryKey: {}", categoryId, categoryKey);
 
@@ -479,8 +484,9 @@ public class AdminPageController {
     @GetMapping("/admin/board-posts/new")
     public String newBoardPost(@RequestParam Long categoryId,
                               @RequestParam String categoryKey,
+                              @RequestParam(required = false, defaultValue = "ko") String lang,
                               Model model) {
-        addCommonAttributes(model, "게시글 작성", "board-posts");
+        addCommonAttributes(model, "게시글 작성", "board-posts", lang);
         model.addAttribute("post", null);
         model.addAttribute("isEdit", false);
         model.addAttribute("categoryId", categoryId);
@@ -492,8 +498,9 @@ public class AdminPageController {
     public String editBoardPost(@PathVariable Long id,
                                @RequestParam Long categoryId,
                                @RequestParam String categoryKey,
+                               @RequestParam(required = false, defaultValue = "ko") String lang,
                                Model model) {
-        addCommonAttributes(model, "게시글 수정", "board-posts");
+        addCommonAttributes(model, "게시글 수정", "board-posts", lang);
         BoardPostRes post = boardPostService.getById(id);
         model.addAttribute("post", post);
         model.addAttribute("isEdit", true);
@@ -540,5 +547,62 @@ public class AdminPageController {
         boardPostService.delete(id);
         redirectAttributes.addFlashAttribute("message", "게시글이 삭제되었습니다.");
         return "redirect:/admin/board-posts?categoryId=" + categoryId + "&categoryKey=" + categoryKey;
+    }
+
+    // ==================== 상담/문의 관리 ====================
+
+    @GetMapping("/admin/inquiries")
+    public String inquiries(@RequestParam(required = false) String status,
+                           @RequestParam(required = false, defaultValue = "ko") String lang,
+                           Model model) {
+        addCommonAttributes(model, "상담/문의 관리", "inquiries", lang);
+
+        List<InquiryRes> inquiries;
+        if (status != null && !status.isEmpty()) {
+            inquiries = inquiryService.listByStatus(InquiryStatus.valueOf(status));
+            model.addAttribute("statusFilter", status);
+        } else {
+            inquiries = inquiryService.listAll();
+        }
+
+        model.addAttribute("inquiries", inquiries);
+        model.addAttribute("pendingCount", inquiryService.countPending());
+        model.addAttribute("unreadCount", inquiryService.countUnread());
+        model.addAttribute("totalCount", inquiries.size());
+
+        return "admin/inquiries/list";
+    }
+
+    @GetMapping("/admin/inquiries/{id}")
+    public String inquiryDetail(@PathVariable Long id,
+                               @RequestParam(required = false, defaultValue = "ko") String lang,
+                               Model model) {
+        addCommonAttributes(model, "문의 상세", "inquiries", lang);
+
+        InquiryRes inquiry = inquiryService.getById(id);
+        model.addAttribute("inquiry", inquiry);
+
+        // 읽음 처리
+        if (!inquiry.getIsRead()) {
+            inquiryService.markAsRead(id);
+        }
+
+        return "admin/inquiries/detail";
+    }
+
+    @PostMapping("/admin/inquiries/{id}/update")
+    public String updateInquiry(@PathVariable Long id,
+                               @ModelAttribute InquiryUpdateReq req,
+                               RedirectAttributes redirectAttributes) {
+        inquiryService.update(id, req);
+        redirectAttributes.addFlashAttribute("message", "문의가 업데이트되었습니다.");
+        return "redirect:/admin/inquiries/" + id;
+    }
+
+    @PostMapping("/admin/inquiries/{id}/delete")
+    public String deleteInquiry(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        inquiryService.delete(id);
+        redirectAttributes.addFlashAttribute("message", "문의가 삭제되었습니다.");
+        return "redirect:/admin/inquiries";
     }
 }

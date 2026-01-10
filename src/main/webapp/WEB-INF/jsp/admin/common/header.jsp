@@ -17,9 +17,16 @@
     <div class="logo">CMS Admin</div>
     <div class="header-actions">
       <div class="lang-switcher">
-        <a href="?lang=ko" class="lang-btn ${adminLang == 'ko' ? 'active' : ''}">한국어</a>
-        <a href="?lang=en" class="lang-btn ${adminLang == 'en' ? 'active' : ''}">English</a>
+        <a href="javascript:void(0)" onclick="switchLang('ko')" class="lang-btn ${adminLang == 'ko' || empty adminLang ? 'active' : ''}">한국어</a>
+        <a href="javascript:void(0)" onclick="switchLang('en')" class="lang-btn ${adminLang == 'en' ? 'active' : ''}">English</a>
       </div>
+      <script>
+      function switchLang(lang) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', lang);
+        window.location.href = url.toString();
+      }
+      </script>
       <a class="header-link" href="/ko" target="_blank">🌐 공개(ko)</a>
       <a class="header-link" href="/en" target="_blank">🌐 공개(en)</a>
       <form action="/logout" method="post" style="display:inline;">

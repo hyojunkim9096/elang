@@ -10,12 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class SiteBannerService {
 
     private final SiteBannerRepository repository;
+
+    // YouTube 동영상 ID를 추출하기 위한 정규식 패턴
+    private static final Pattern YOUTUBE_ID_PATTERN = Pattern.compile(
+            "(?:https?://)?(?:www\\.)?(?:youtube\\.com/(?:watch\\?v=|embed/|v/)|youtu\\.be/)([\\w-]{11})(?:.*)?");
 
     @Transactional(readOnly = true)
     public List<BannerRes> list(String langRaw, boolean enabledOnly) {
@@ -86,10 +92,17 @@ public class SiteBannerService {
     }
 
     private void apply(SiteBanner b, BannerUpsertReq req) {
+        String url = trimToNull(req.getUrl());
+
+        // 배너 타입이 YOUTUBE인 경우, URL을 삽입용으로 변환
+        if (req.getType() == BannerType.YOUTUBE && url != null) {
+            url = convertYoutubeUrl(url);
+        }
+
         b.setCategoryId(req.getCategoryId());
         b.setTitle(req.getTitle() == null ? "" : req.getTitle().trim());
         b.setType(req.getType());
-        b.setUrl(trimToNull(req.getUrl()));
+        b.setUrl(url);
         b.setLinkUrl(trimToNull(req.getLinkUrl()));
         b.setSortOrder(req.getSortOrder());
         b.setEnabled(req.getEnabled());
@@ -101,6 +114,24 @@ public class SiteBannerService {
             b.setWidth(req.getWidth());
             b.setHeight(req.getHeight());
         }
+    }
+
+    /**
+     * 일반 YouTube URL을 삽입(embed)용 URL로 변환합니다.
+     * @param url 변환할 YouTube URL
+     * @return 삽입용 URL. 변환할 수 없는 경우 원본 URL을 반환합니다.
+     */
+    private String convertYoutubeUrl(String url) {
+        if (url == null) return null;
+
+        Matcher matcher = YOUTUBE_ID_PATTERN.matcher(url);
+        if (matcher.find()) {
+            String videoId = matcher.group(1);
+            return "https://www.youtube.com/embed/" + videoId;
+        }
+
+        // 정규식에 매칭되지 않으면 원본 URL을 그대로 반환
+        return url;
     }
 
     private BannerRes toRes(SiteBanner b) {

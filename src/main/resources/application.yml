@@ -3,7 +3,8 @@ server:
 
 spring:
   profiles:
-    default: local
+    # 로컬에서 개발 시 기본으로 'local-cafe24-db' 프로필을 사용하도록 변경
+    default: local-cafe24-db
 
   mvc:
     view:
@@ -25,6 +26,8 @@ app:
   admin:
     username: admin
     password: admin1234
+  # 파일 업로드 디렉토리 경로 (사용자 홈 디렉토리 아래 elang-uploads 폴더)
+  upload-dir: ${user.home}/elang-uploads/
 
 logging:
   level:

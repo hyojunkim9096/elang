@@ -17,6 +17,7 @@ public class ElangCampApplication extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        return builder.sources(ElangCampApplication.class);
+        // 외부 Tomcat으로 배포될 때 'cafe24' 프로필을 활성화합니다.
+        return builder.sources(ElangCampApplication.class).profiles("cafe24");
     }
 }

@@ -48,6 +48,14 @@
           <span class="nav-text">게시글</span>
         </a>
       </div>
+
+      <div class="nav-section">
+        <div class="nav-title">고객관리</div>
+        <a href="/admin/inquiries" class="nav-item ${active == 'inquiries' ? 'active' : ''}">
+          <span class="nav-icon">💬</span>
+          <span class="nav-text">문의 관리</span>
+        </a>
+      </div>
     </c:if>
 
     <c:if test="${not empty adminMenus}">

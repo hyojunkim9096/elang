@@ -1,0 +1,16 @@
+# [주의] 이 프로필은 로컬 개발 환경에서 원격 DB를 직접 바라보는 위험한 방식입니다.
+# 데이터 유실의 위험이 있으므로, ddl-auto는 반드시 validate 또는 none으로 설정해야 합니다.
+spring:
+  datasource:
+    # Cafe24 DB 외부 접속 주소
+    url: jdbc:mariadb://hyojunkim9096.cafe24.com:3306/hyojunkim9096?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Seoul
+    username: hyojunkim9096
+    password: Q1w2e3r4t5!@
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      # 중요! 실제 DB에 연결하므로 절대 create, create-drop 사용 금지!
+      ddl-auto: validate
+  flyway:
+    # 로컬에서 실행할 때는 DB 마이그레이션을 비활성화하는 것이 안전합니다.
+    enabled: false

@@ -5,23 +5,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Spring MVC 설정
- */
 @Configuration
-public class WebConfig implements WebMvcConfigurer {
+public class WebMvcConfig implements WebMvcConfigurer {
 
-    // application.yml 또는 활성화된 프로필의 yml 파일에서 'app.upload-dir' 값을 주입받습니다.
     @Value("${app.upload-dir}")
     private String uploadDir;
 
-    /**
-     * 정적 리소스 핸들러 설정
-     * /uploads/** URL 요청을 외부 파일 시스템 경로에 매핑합니다.
-     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 예: /uploads/image.png -> file:///Users/user/elang-uploads/image.png
+        // 기존 리소스 핸들러는 그대로 유지하면서,
+        // '/uploads/**' URL 패턴을 외부 파일 시스템 경로와 매핑합니다.
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + uploadDir);
     }

@@ -51,6 +51,25 @@ public class ContentPageService {
         return ContentPageRes.from(page);
     }
 
+    /**
+     * 카테고리 키로 활성화된 최신 페이지 조회
+     * @param lang 언어 코드
+     * @param categoryKey 카테고리 키 (예: about, program)
+     * @return 활성화된 최신 컨텐츠 페이지
+     */
+    public ContentPageRes getLatestByCategoryKey(String lang, String categoryKey) {
+        // 1. 카테고리 조회
+        ContentCategory category = contentCategoryRepository.findByLangAndCategoryKey(lang, categoryKey)
+            .orElseThrow(() -> new NotFoundException("ContentCategory not found: " + lang + "/" + categoryKey));
+
+        // 2. 해당 카테고리에서 활성화된 최신 페이지 조회
+        ContentPage page = contentPageRepository
+            .findFirstByCategoryIdAndEnabledOrderByCreatedAtDesc(category.getId(), true)
+            .orElseThrow(() -> new NotFoundException("No enabled content page found for category: " + categoryKey));
+
+        return ContentPageRes.from(page);
+    }
+
     @Transactional
     public ContentPageRes create(ContentPageUpsertReq req) {
         // 카테고리로부터 lang과 pageKey 가져오기

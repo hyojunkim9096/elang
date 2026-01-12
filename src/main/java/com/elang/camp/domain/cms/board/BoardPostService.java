@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,17 +23,35 @@ public class BoardPostService {
     private final BoardPostRepository boardPostRepository;
     private final AttachFileService attachFileService;
 
-    public List<BoardPostRes> listByCategoryId(Long categoryId, Boolean enabledOnly) {
-        if (enabledOnly != null && enabledOnly) {
-            return boardPostRepository.findByCategoryIdAndEnabledOrderByIsPinnedDescPublishedAtDesc(categoryId, true)
-                .stream()
-                .map(BoardPostRes::from)
-                .collect(Collectors.toList());
+    public List<BoardPostRes> listByCategoryId(Long categoryId, Boolean enabledOnly, String searchType, String keyword) {
+        List<BoardPost> posts;
+
+        if (StringUtils.hasText(keyword)) {
+            // 검색어가 있는 경우
+            if ("content".equalsIgnoreCase(searchType)) {
+                // 내용 검색은 네이티브 쿼리 사용
+                posts = boardPostRepository.findByContentContainingWithQuery(categoryId, enabledOnly, keyword);
+            } else {
+                // 기본은 제목 검색
+                posts = boardPostRepository.findByCategoryIdAndEnabledAndTitleContainingIgnoreCaseOrderByIsPinnedDescPublishedAtDesc(categoryId, enabledOnly, keyword);
+            }
+        } else {
+            // 검색어가 없는 경우
+            if (enabledOnly != null && enabledOnly) {
+                posts = boardPostRepository.findByCategoryIdAndEnabledOrderByIsPinnedDescPublishedAtDesc(categoryId, true);
+            } else {
+                posts = boardPostRepository.findByCategoryIdOrderByIsPinnedDescPublishedAtDesc(categoryId);
+            }
         }
-        return boardPostRepository.findByCategoryIdOrderByIsPinnedDescPublishedAtDesc(categoryId)
-            .stream()
+
+        return posts.stream()
             .map(BoardPostRes::from)
             .collect(Collectors.toList());
+    }
+
+    // 기존 메서드 오버로딩으로 유지
+    public List<BoardPostRes> listByCategoryId(Long categoryId, Boolean enabledOnly) {
+        return listByCategoryId(categoryId, enabledOnly, null, null);
     }
 
     public List<BoardPostRes> listByCategoryIdAndLang(Long categoryId, String lang) {

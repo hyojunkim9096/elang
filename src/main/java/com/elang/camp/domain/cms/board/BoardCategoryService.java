@@ -4,6 +4,7 @@ import com.elang.camp.domain.cms.base.AbstractCategoryService;
 import com.elang.camp.domain.cms.board.dto.BoardCategoryRes;
 import com.elang.camp.domain.cms.board.dto.BoardCategoryUpsertReq;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,6 +13,19 @@ public class BoardCategoryService extends AbstractCategoryService<BoardCategory,
 
     public BoardCategoryService(BoardCategoryRepository repository) {
         super(repository);
+    }
+
+    /**
+     * 언어와 카테고리 키로 카테고리 정보를 조회합니다.
+     * @param lang 언어 코드 (ko, en)
+     * @param categoryKey 카테고리 키
+     * @return BoardCategoryRes DTO, 없으면 null
+     */
+    @Transactional(readOnly = true)
+    public BoardCategoryRes getByKey(String lang, String categoryKey) {
+        return repository.findByLangAndCategoryKey(lang, categoryKey)
+                .map(this::toResponse)
+                .orElse(null);
     }
 
     @Override

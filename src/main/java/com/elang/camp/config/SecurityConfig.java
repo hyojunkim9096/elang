@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 public class SecurityConfig {
@@ -28,8 +29,20 @@ public class SecurityConfig {
         );
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/error", "/assets/**", "/uploads/**", "/favicon.ico").permitAll()
+                // 정적 리소스 및 공용 페이지는 모두 허용
+                .requestMatchers(
+                    new AntPathRequestMatcher("/"),
+                    new AntPathRequestMatcher("/login"),
+                    new AntPathRequestMatcher("/error"),
+                    new AntPathRequestMatcher("/assets/**"),
+                    new AntPathRequestMatcher("/uploads/**"),
+                    new AntPathRequestMatcher("/favicon.ico"),
+                    // 언어 코드가 포함된 모든 공개 경로 허용
+                    new AntPathRequestMatcher("/{lang:(?:ko|en)}/**") 
+                ).permitAll()
+                // 관리자 페이지는 ADMIN 역할 필요
                 .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
+                // 그 외 모든 요청은 일단 허용 (필요 시 더 세분화 가능)
                 .anyRequest().permitAll()
         );
 

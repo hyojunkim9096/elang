@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="${lang}">
 <head>
@@ -9,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/public.css"/>
+  <link rel="stylesheet" href="/assets/css/public.css?v=${System.currentTimeMillis()}"/>
 </head>
-<body>
+<body class="home-page">
 
 <!-- Header -->
 <header class="site-header" id="siteHeader">
@@ -31,18 +32,47 @@
         <c:forEach var="m" items="${menus}">
           <c:if test="${m.parentId == null}">
             <li class="nav-item">
-              <a href="${m.href}"><c:out value="${m.label}"/></a>
-              <c:set var="hasChildren" value="false"/>
+              <%-- 1. 1뎁스 메뉴의 링크를 기본값으로 설정 --%>
+              <c:set var="finalHref" value="${m.href}" />
+              <c:set var="hasChildren" value="false" />
+              <c:set var="isFirstChildFound" value="false" />
+
+              <%-- 2. 자식 메뉴를 탐색하여, 1뎁스 링크가 '#'일 경우 첫 자식의 링크로 덮어쓰기 --%>
               <c:forEach var="child" items="${menus}">
                 <c:if test="${child.parentId == m.id}">
-                  <c:set var="hasChildren" value="true"/>
+                  <c:set var="hasChildren" value="true" />
+                  <c:if test="${m.href == '#' && !isFirstChildFound}">
+                    <c:set var="finalHref" value="${child.href}" />
+                    <c:set var="isFirstChildFound" value="true" />
+                  </c:if>
                 </c:if>
               </c:forEach>
+
+              <%-- 3. 최종 결정된 링크로 a 태그 생성 --%>
+              <c:choose>
+                <c:when test="${fn:startsWith(finalHref, 'http')}">
+                  <a href="${finalHref}"><c:out value="${m.label}"/></a>
+                </c:when>
+                <c:otherwise>
+                  <a href="/${lang}${finalHref}"><c:out value="${m.label}"/></a>
+                </c:otherwise>
+              </c:choose>
+
+              <%-- 4. 하위 메뉴(sub-menu) 렌더링 --%>
               <c:if test="${hasChildren}">
                 <ul class="sub-menu">
                   <c:forEach var="child" items="${menus}">
                     <c:if test="${child.parentId == m.id}">
-                      <li><a href="${child.href}"><c:out value="${child.label}"/></a></li>
+                      <li>
+                        <c:choose>
+                          <c:when test="${fn:startsWith(child.href, 'http')}">
+                            <a href="${child.href}"><c:out value="${child.label}"/></a>
+                          </c:when>
+                          <c:otherwise>
+                            <a href="/${lang}${child.href}"><c:out value="${child.label}"/></a>
+                          </c:otherwise>
+                        </c:choose>
+                      </li>
                     </c:if>
                   </c:forEach>
                 </ul>
@@ -179,6 +209,73 @@
                    data-max-count="${category.popupMaxCount}"
                    data-duration="${category.popupDuration}"
                    data-lang="${lang}">
+              </div>
+            </c:when>
+
+            <%-- bottom_banner: 하단 풀폭 배너 --%>
+            <c:when test="${categoryKey == 'bottom_banner'}">
+              <section class="section bottom-banner-section fade-in">
+                <div class="container">
+                  <c:if test="${not empty category.name}">
+                    <div class="section-header">
+                      <h2 class="section-title"><c:out value="${category.name}"/></h2>
+                      <c:if test="${not empty category.description}">
+                        <p class="section-desc"><c:out value="${category.description}"/></p>
+                      </c:if>
+                    </div>
+                  </c:if>
+                  <div class="bottom-banner-grid">
+                    <c:forEach var="b" items="${banners}">
+                      <div class="bottom-banner-card">
+                        <c:choose>
+                          <c:when test="${b.type.name() == 'IMAGE'}">
+                            <a href="${b.linkUrl != null ? b.linkUrl : '#'}" class="bottom-banner-link">
+                              <img src="${b.url}" alt="${b.title}"/>
+                              <c:if test="${not empty b.title}">
+                                <div class="bottom-banner-overlay">
+                                  <h3><c:out value="${b.title}"/></h3>
+                                </div>
+                              </c:if>
+                            </a>
+                          </c:when>
+                          <c:when test="${b.type.name() == 'YOUTUBE'}">
+                            <div class="video-wrapper">
+                              <iframe src="${b.url}" title="${b.title}" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                          </c:when>
+                          <c:otherwise>
+                            <video src="${b.url}" controls></video>
+                          </c:otherwise>
+                        </c:choose>
+                      </div>
+                    </c:forEach>
+                  </div>
+                </div>
+              </section>
+            </c:when>
+
+            <%-- side_banner: 사이드 플로팅 배너 --%>
+            <c:when test="${categoryKey == 'side_banner'}">
+              <div class="side-banner-container" id="sideBanner">
+                <c:forEach var="b" items="${banners}" varStatus="status">
+                  <c:if test="${status.index < 3}">
+                    <div class="side-banner-item">
+                      <c:choose>
+                        <c:when test="${b.type.name() == 'IMAGE'}">
+                          <a href="${b.linkUrl != null ? b.linkUrl : '#'}" target="_blank">
+                            <img src="${b.url}" alt="${b.title}"/>
+                          </a>
+                        </c:when>
+                        <c:otherwise>
+                          <a href="${b.linkUrl != null ? b.linkUrl : '#'}" target="_blank">
+                            <span class="side-banner-text"><c:out value="${b.title}"/></span>
+                          </a>
+                        </c:otherwise>
+                      </c:choose>
+                    </div>
+                  </c:if>
+                </c:forEach>
+                <button class="side-banner-close" onclick="document.getElementById('sideBanner').style.display='none'">&times;</button>
               </div>
             </c:when>
 
@@ -397,6 +494,33 @@ document.addEventListener('DOMContentLoaded', function() {
   if (mobileToggle && navMenu) {
     mobileToggle.addEventListener('click', function() {
       navMenu.classList.toggle('active');
+      mobileToggle.classList.toggle('active');
+      document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+    });
+
+    // Close mobile menu when clicking on a menu item
+    navMenu.addEventListener('click', function(e) {
+      if (e.target.tagName === 'A' && !e.target.classList.contains('has-submenu')) {
+        navMenu.classList.remove('active');
+        mobileToggle.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // Mobile submenu toggle
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      const submenu = item.querySelector('.sub-menu');
+      if (submenu) {
+        const link = item.querySelector('a');
+        link.classList.add('has-submenu');
+        link.addEventListener('click', function(e) {
+          if (window.innerWidth <= 768) {
+            e.preventDefault();
+            item.classList.toggle('open');
+          }
+        });
+      }
     });
   }
 
@@ -626,22 +750,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const cookieName = 'popup_closed_' + new Date().toISOString().split('T')[0];
         if (document.cookie.indexOf(cookieName) === -1 && banners.length > 0) {
+          const isMobile = window.innerWidth <= 768;
+
           banners.slice(0, maxCount).forEach(function(banner, index) {
             const popup = document.createElement('div');
             popup.className = 'popup-banner';
-            popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:' + (10000 - index) + ';background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.3);border-radius:12px;overflow:hidden;';
+
+            // 반응형 스타일 적용
+            if (isMobile) {
+              popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:' + (10000 - index) + ';background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.3);border-radius:12px;overflow:hidden;width:92vw;max-width:92vw;';
+            } else {
+              popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:' + (10000 - index) + ';background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.3);border-radius:12px;overflow:hidden;max-width:600px;';
+            }
 
             let content = '';
             if (banner.type === 'IMAGE') {
-              content = '<a href="' + (banner.linkUrl || '#') + '"><img src="' + banner.url + '" alt="' + banner.title + '" style="max-width:600px;max-height:80vh;display:block;"/></a>';
+              if (isMobile) {
+                content = '<a href="' + (banner.linkUrl || '#') + '"><img src="' + banner.url + '" alt="' + banner.title + '" style="width:100%;max-height:65vh;object-fit:contain;display:block;"/></a>';
+              } else {
+                content = '<a href="' + (banner.linkUrl || '#') + '"><img src="' + banner.url + '" alt="' + banner.title + '" style="max-width:600px;max-height:80vh;display:block;"/></a>';
+              }
             } else if (banner.type === 'YOUTUBE') {
-              content = '<div style="width:560px;height:315px;"><iframe src="' + banner.url + '" width="100%" height="100%" frameborder="0" allowfullscreen></iframe></div>';
+              if (isMobile) {
+                content = '<div style="width:100%;aspect-ratio:16/9;"><iframe src="' + banner.url + '" width="100%" height="100%" frameborder="0" allowfullscreen></iframe></div>';
+              } else {
+                content = '<div style="width:560px;height:315px;"><iframe src="' + banner.url + '" width="100%" height="100%" frameborder="0" allowfullscreen></iframe></div>';
+              }
             }
 
             const closeText = popupLang === 'ko' ? '오늘 그만 보기' : "Don't show today";
             const closeBtn = popupLang === 'ko' ? '닫기' : 'Close';
 
-            popup.innerHTML = content + '<div style="padding:12px 16px;text-align:right;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center;"><label style="cursor:pointer;font-size:14px;color:#666;"><input type="checkbox" class="popup-today-close" style="margin-right:6px;"/> ' + closeText + '</label><button class="popup-close" style="padding:8px 16px;cursor:pointer;background:#2563eb;color:white;border:none;border-radius:6px;font-weight:500;">' + closeBtn + '</button></div>';
+            // 모바일에서는 버튼을 세로 배치
+            if (isMobile) {
+              popup.innerHTML = content + '<div style="padding:12px;border-top:1px solid #eee;display:flex;flex-direction:column;gap:10px;"><label style="cursor:pointer;font-size:13px;color:#666;display:flex;align-items:center;"><input type="checkbox" class="popup-today-close" style="margin-right:8px;width:18px;height:18px;"/> ' + closeText + '</label><button class="popup-close" style="padding:12px 16px;cursor:pointer;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:600;font-size:15px;width:100%;">' + closeBtn + '</button></div>';
+            } else {
+              popup.innerHTML = content + '<div style="padding:12px 16px;text-align:right;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center;"><label style="cursor:pointer;font-size:14px;color:#666;"><input type="checkbox" class="popup-today-close" style="margin-right:6px;"/> ' + closeText + '</label><button class="popup-close" style="padding:8px 16px;cursor:pointer;background:#2563eb;color:white;border:none;border-radius:6px;font-weight:500;">' + closeBtn + '</button></div>';
+            }
 
             document.body.appendChild(popup);
 

@@ -123,18 +123,28 @@ public class AdminPageController {
     }
 
     @GetMapping("/admin/menus/new")
-    public String newMenu(@RequestParam(required = false, defaultValue = "ko") String lang, Model model) {
+    public String newMenu(@RequestParam(required = false, defaultValue = "ko") String lang,
+                         @RequestParam(required = false, defaultValue = "admin") String menuType,
+                         Model model) {
         addCommonAttributes(model, "메뉴 추가", "menus", lang);
         model.addAttribute("menu", null);
         model.addAttribute("isEdit", false);
         List<MenuRes> allMenus = menuService.list(null, false);
         model.addAttribute("allMenus", allMenus);
+
+        // 사용자 메뉴일 경우 컨텐츠/게시판 카테고리 목록 전달
+        if ("public".equals(menuType)) {
+            model.addAttribute("contentCategories", contentCategoryService.list(lang));
+            model.addAttribute("boardCategories", boardCategoryService.list(lang));
+        }
+
         return "admin/menus/form";
     }
 
     @GetMapping("/admin/menus/{id}/edit")
     public String editMenu(@PathVariable Long id,
                           @RequestParam(required = false, defaultValue = "ko") String lang,
+                          @RequestParam(required = false, defaultValue = "admin") String menuType,
                           Model model) {
         addCommonAttributes(model, "메뉴 수정", "menus", lang);
         MenuRes menu = menuService.list(null, false).stream()
@@ -145,6 +155,13 @@ public class AdminPageController {
         model.addAttribute("isEdit", true);
         List<MenuRes> allMenus = menuService.list(null, false);
         model.addAttribute("allMenus", allMenus);
+
+        // 사용자 메뉴일 경우 컨텐츠/게시판 카테고리 목록 전달
+        if ("public".equals(menuType)) {
+            model.addAttribute("contentCategories", contentCategoryService.list(lang));
+            model.addAttribute("boardCategories", boardCategoryService.list(lang));
+        }
+
         return "admin/menus/form";
     }
 

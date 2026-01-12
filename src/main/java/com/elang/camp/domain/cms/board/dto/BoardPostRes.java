@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @AllArgsConstructor
@@ -21,6 +22,16 @@ public class BoardPostRes {
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public String getCreatedAtFormatted() {
+        return createdAt != null ? createdAt.format(DATE_FORMATTER) : "";
+    }
+
+    public String getPublishedAtFormatted() {
+        return publishedAt != null ? publishedAt.format(DATE_FORMATTER) : "";
+    }
 
     public static BoardPostRes from(BoardPost entity) {
         return new BoardPostRes(

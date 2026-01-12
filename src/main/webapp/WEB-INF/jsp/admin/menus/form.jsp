@@ -43,11 +43,42 @@
         <small style="color: #666;">예: 대시보드, 게시판 관리</small>
       </div>
 
-      <div class="form-group">
+      <c:if test="${param.menuType == 'public'}">
+        <div class="form-group">
+          <label for="linkType">링크 타입<span class="required">*</span></label>
+          <select id="linkType" name="linkType" class="form-select" onchange="onLinkTypeChange()">
+            <option value="external" ${empty menu || (menu.href != null && !menu.href.contains('/page/') && !menu.href.contains('/board/')) ? 'selected' : ''}>외부/직접 링크</option>
+            <option value="content" ${menu != null && menu.href != null && menu.href.contains('/page/') ? 'selected' : ''}>컨텐츠 페이지</option>
+            <option value="board" ${menu != null && menu.href != null && menu.href.contains('/board/') ? 'selected' : ''}>게시판</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="contentCategoryGroup" style="display: none;">
+          <label for="contentCategory">컨텐츠 카테고리<span class="required">*</span></label>
+          <select id="contentCategory" class="form-select" onchange="onCategorySelect('content')">
+            <option value="">-- 카테고리 선택 --</option>
+            <c:forEach var="cat" items="${contentCategories}">
+              <option value="${cat.categoryKey}" data-name="${cat.name}">${cat.name} (${cat.categoryKey})</option>
+            </c:forEach>
+          </select>
+        </div>
+
+        <div class="form-group" id="boardCategoryGroup" style="display: none;">
+          <label for="boardCategory">게시판 카테고리<span class="required">*</span></label>
+          <select id="boardCategory" class="form-select" onchange="onCategorySelect('board')">
+            <option value="">-- 카테고리 선택 --</option>
+            <c:forEach var="cat" items="${boardCategories}">
+              <option value="${cat.categoryKey}" data-name="${cat.name}" data-display="${cat.displayType}">${cat.name} (${cat.categoryKey}) - ${cat.displayType}</option>
+            </c:forEach>
+          </select>
+        </div>
+      </c:if>
+
+      <div class="form-group" id="hrefGroup">
         <label for="href">링크 (Href)<span class="required">*</span></label>
         <input type="text" id="href" name="href" class="form-input" value="${menu != null ? menu.href : ''}" required>
-        <small style="color: #666;">
-          예: ${param.menuType == 'public' ? '/about, /contact' : '/admin/dashboard, /admin/board-categories'}
+        <small style="color: #666;" id="hrefHint">
+          예: ${param.menuType == 'public' ? '/page/about, /board/notice (언어는 자동 적용)' : '/admin/dashboard, /admin/board-categories'}
         </small>
       </div>
 
@@ -73,4 +104,81 @@
 </div>
 
 </main>
+
+<c:if test="${param.menuType == 'public'}">
+<script>
+  const langSelect = document.getElementById('lang');
+  const linkTypeSelect = document.getElementById('linkType');
+  const contentCategoryGroup = document.getElementById('contentCategoryGroup');
+  const boardCategoryGroup = document.getElementById('boardCategoryGroup');
+  const contentCategorySelect = document.getElementById('contentCategory');
+  const boardCategorySelect = document.getElementById('boardCategory');
+  const hrefInput = document.getElementById('href');
+  const labelInput = document.getElementById('label');
+
+  function onLinkTypeChange() {
+    const linkType = linkTypeSelect.value;
+
+    contentCategoryGroup.style.display = 'none';
+    boardCategoryGroup.style.display = 'none';
+
+    if (linkType === 'content') {
+      contentCategoryGroup.style.display = 'block';
+    } else if (linkType === 'board') {
+      boardCategoryGroup.style.display = 'block';
+    }
+  }
+
+  function onCategorySelect(type) {
+    let categoryKey, categoryName;
+
+    if (type === 'content') {
+      const selected = contentCategorySelect.options[contentCategorySelect.selectedIndex];
+      categoryKey = selected.value;
+      categoryName = selected.dataset.name;
+      if (categoryKey) {
+        hrefInput.value = '/page/' + categoryKey;
+        if (!labelInput.value) {
+          labelInput.value = categoryName;
+        }
+      }
+    } else if (type === 'board') {
+      const selected = boardCategorySelect.options[boardCategorySelect.selectedIndex];
+      categoryKey = selected.value;
+      categoryName = selected.dataset.name;
+      if (categoryKey) {
+        hrefInput.value = '/board/' + categoryKey;
+        if (!labelInput.value) {
+          labelInput.value = categoryName;
+        }
+      }
+    }
+  }
+
+  // 언어는 href에 포함하지 않으므로 이벤트 불필요
+
+  // 페이지 로드 시 초기화
+  document.addEventListener('DOMContentLoaded', function() {
+    onLinkTypeChange();
+
+    // 기존 href 값으로 카테고리 선택 복원
+    const currentHref = hrefInput.value;
+    if (currentHref) {
+      const pageMatch = currentHref.match(/\/page\/([^\/]+)/);
+      const boardMatch = currentHref.match(/\/board\/([^\/]+)/);
+
+      if (pageMatch) {
+        linkTypeSelect.value = 'content';
+        onLinkTypeChange();
+        contentCategorySelect.value = pageMatch[1];
+      } else if (boardMatch) {
+        linkTypeSelect.value = 'board';
+        onLinkTypeChange();
+        boardCategorySelect.value = boardMatch[1];
+      }
+    }
+  });
+</script>
+</c:if>
+
 <jsp:include page="../common/footer.jsp"/>

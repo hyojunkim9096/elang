@@ -187,3 +187,66 @@ ${lang == 'ko' ? '상담신청' : 'Contact Us'}
 ---
 
 ## 승인 후 진행 예정
+
+---
+
+# 사용자 메뉴 시스템 구현 계획
+
+## 현재 상태
+
+### 이미 구현된 것
+- `/{lang}/page/{pageKey}` - 컨텐츠 페이지 라우트
+- `/{lang}/board/{categoryKey}` - 게시판 목록 라우트 (LIST/CARD/THUMBNAIL 분기 처리 완료)
+- `/{lang}/board/{categoryKey}/{postId}` - 게시글 상세 라우트
+- SiteMenu 엔티티 및 메뉴 관리 페이지
+
+### 개선이 필요한 부분
+1. 메뉴 폼에서 href를 직접 입력해야 함 → 카테고리 선택 드롭다운 필요
+2. userContent.jsp, board-list.jsp, board-detail.jsp에 동적 메뉴가 없음
+
+---
+
+## 구현 작업
+
+### 1. 메뉴 폼 개선 (admin/menus/form.jsp)
+- 링크 타입 선택 추가: `외부링크`, `컨텐츠 페이지`, `게시판`
+- 컨텐츠 카테고리 드롭다운 (링크 타입이 '컨텐츠 페이지'일 때)
+- 게시판 카테고리 드롭다운 (링크 타입이 '게시판'일 때)
+- 선택 시 자동으로 href 생성: `/{lang}/page/{categoryKey}` 또는 `/{lang}/board/{categoryKey}`
+
+### 2. AdminPageController 수정
+- 메뉴 폼에 컨텐츠 카테고리, 게시판 카테고리 목록 전달
+
+### 3. 공통 헤더 컴포넌트 생성 (public/common/header.jsp)
+- home.jsp의 헤더 부분을 공통 컴포넌트로 분리
+- 동적 메뉴 렌더링 (SiteMenu 기반)
+
+### 4. userContent.jsp 개선
+- 공통 헤더 포함
+- 동적 메뉴 네비게이션 표시
+
+### 5. board-list.jsp 개선
+- 공통 헤더 포함
+- 동적 메뉴 네비게이션 표시
+
+### 6. board-detail.jsp 개선
+- 공통 헤더 포함
+- 동적 메뉴 네비게이션 표시
+
+### 7. PublicController 수정
+- contentPage, boardList, boardDetail 메서드에 menus 데이터 추가
+
+---
+
+## 파일 변경 목록
+
+| 파일 | 작업 |
+|------|------|
+| `AdminPageController.java` | 메뉴 폼에 카테고리 목록 전달 |
+| `admin/menus/form.jsp` | 카테고리 선택 UI 추가 |
+| `public/common/header.jsp` | 신규 생성 - 공통 헤더 |
+| `public/common/footer.jsp` | 신규 생성 - 공통 푸터 |
+| `PublicController.java` | 메뉴 데이터 전달 추가 |
+| `public/userContent.jsp` | 공통 헤더/푸터 적용 |
+| `public/board-list.jsp` | 공통 헤더/푸터 적용 |
+| `public/board-detail.jsp` | 공통 헤더/푸터 적용 |

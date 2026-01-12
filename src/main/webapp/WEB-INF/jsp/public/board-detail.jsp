@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<jsp:include page="common/header.jsp"/>
+<%@ taglib prefix="layout" tagdir="/WEB-INF/tags" %>
+
+<layout:layout-public pageTitle="${post.title}" pageClass="board-detail-page">
 
 <style>
   .post-header {
@@ -61,4 +63,4 @@
   </div>
 </main>
 
-<jsp:include page="common/footer.jsp"/>
+</layout:layout-public>

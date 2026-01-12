@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<jsp:include page="common/header.jsp"/>
+<%@ taglib prefix="layout" tagdir="/WEB-INF/tags" %>
+
+<layout:layout-public pageTitle="${categoryName}" pageClass="board-page">
 
 <style>
   /* 리스트형 스타일 */
@@ -181,4 +183,4 @@
   </div>
 </main>
 
-<jsp:include page="common/footer.jsp"/>
+</layout:layout-public>

@@ -1,21 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="layout" tagdir="/WEB-INF/tags" %>
 
-<jsp:include page="common/header.jsp" />
-
-<main class="main-content">
-    <div class="container">
-        <div class="content-entry">
-            <%-- 페이지 제목 --%>
-            <h1 class="content-title">${title}</h1>
-
-            <%-- Quill 에디터 등으로 작성된 HTML 컨텐츠 --%>
-            <div class="content-body">
-                ${content}
-            </div>
-        </div>
-    </div>
-</main>
+<layout:layout-public pageTitle="${title}" pageClass="content-page">
 
 <style>
 /* 컨텐츠 페이지 기본 스타일 */
@@ -49,4 +36,18 @@
 }
 </style>
 
-<jsp:include page="common/footer.jsp" />
+<main class="content-wrapper">
+    <div class="container">
+        <div class="content-entry">
+            <%-- 페이지 제목 --%>
+            <h1 class="content-title">${title}</h1>
+
+            <%-- Quill 에디터 등으로 작성된 HTML 컨텐츠 --%>
+            <div class="content-body">
+                ${content}
+            </div>
+        </div>
+    </div>
+</main>
+
+</layout:layout-public>

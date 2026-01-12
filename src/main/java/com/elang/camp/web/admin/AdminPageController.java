@@ -71,6 +71,10 @@ public class AdminPageController {
 
         // 관리자 메뉴 로드 (지정된 언어, admin 타입, 활성화된 것만)
         List<MenuRes> adminMenus = menuService.list(lang, "admin", true);
+        // 해당 언어에 메뉴가 없으면 한국어로 대체 (fallback)
+        if (adminMenus.isEmpty() && !"ko".equals(lang)) {
+            adminMenus = menuService.list("ko", "admin", true);
+        }
         model.addAttribute("adminMenus", adminMenus);
     }
 
@@ -129,7 +133,7 @@ public class AdminPageController {
         addCommonAttributes(model, "메뉴 추가", "menus", lang);
         model.addAttribute("menu", null);
         model.addAttribute("isEdit", false);
-        List<MenuRes> allMenus = menuService.list(null, false);
+        List<MenuRes> allMenus = menuService.listAll();
         model.addAttribute("allMenus", allMenus);
 
         // 사용자 메뉴일 경우 컨텐츠/게시판 카테고리 목록 전달
@@ -147,13 +151,10 @@ public class AdminPageController {
                           @RequestParam(required = false, defaultValue = "admin") String menuType,
                           Model model) {
         addCommonAttributes(model, "메뉴 수정", "menus", lang);
-        MenuRes menu = menuService.list(null, false).stream()
-            .filter(m -> m.getId().equals(id))
-            .findFirst()
-            .orElse(null);
+        MenuRes menu = menuService.findById(id);
         model.addAttribute("menu", menu);
         model.addAttribute("isEdit", true);
-        List<MenuRes> allMenus = menuService.list(null, false);
+        List<MenuRes> allMenus = menuService.listAll();
         model.addAttribute("allMenus", allMenus);
 
         // 사용자 메뉴일 경우 컨텐츠/게시판 카테고리 목록 전달
@@ -188,10 +189,13 @@ public class AdminPageController {
     }
 
     @PostMapping("/admin/menus/{id}/delete")
-    public String deleteMenu(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deleteMenu(@PathVariable Long id,
+                            @RequestParam(required = false, defaultValue = "admin") String menuType,
+                            @RequestParam(required = false, defaultValue = "ko") String lang,
+                            RedirectAttributes redirectAttributes) {
         menuService.delete(id);
         redirectAttributes.addFlashAttribute("message", "메뉴가 삭제되었습니다.");
-        return "redirect:/admin/menus";
+        return "redirect:/admin/menus?menuType=" + menuType + "&lang=" + lang;
     }
 
     @PostMapping("/admin/menus/reorder")
@@ -538,6 +542,7 @@ public class AdminPageController {
                                @RequestParam String categoryKey,
                                @RequestParam(required = false, defaultValue = "0") Integer isPinned,
                                @RequestParam(required = false, defaultValue = "1") Integer enabled,
+                               @RequestParam(required = false, defaultValue = "1") Integer commentsEnabled,
                                RedirectAttributes redirectAttributes) {
         log.debug("saveBoardPost called - thumbnail: {}, title: {}, categoryId: {}",
                   req.getThumbnail(), req.getTitle(), req.getCategoryId());
@@ -545,6 +550,7 @@ public class AdminPageController {
         // 체크박스 값 설정
         req.setIsPinned(isPinned != null && isPinned == 1);
         req.setEnabled(enabled == null || enabled == 1);
+        req.setCommentsEnabled(commentsEnabled == null || commentsEnabled == 1);
 
         if (id != null) {
             boardPostService.update(id, req);

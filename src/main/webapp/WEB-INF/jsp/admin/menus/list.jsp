@@ -157,6 +157,8 @@
                     <form action="/admin/menus/${menu.id}/delete" method="post" style="display: inline;"
                           onsubmit="return confirm('정말 삭제하시겠습니까?');">
                       <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                      <input type="hidden" name="menuType" value="${param.menuType != null ? param.menuType : 'admin'}"/>
+                      <input type="hidden" name="lang" value="${param.lang != null ? param.lang : 'ko'}"/>
                       <button type="submit" class="btn btn-sm btn-danger">삭제</button>
                     </form>
                   </div>
@@ -189,6 +191,8 @@
                             <form action="/admin/menus/${child.id}/delete" method="post" style="display: inline;"
                                   onsubmit="return confirm('정말 삭제하시겠습니까?');">
                               <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                              <input type="hidden" name="menuType" value="${param.menuType != null ? param.menuType : 'admin'}"/>
+                              <input type="hidden" name="lang" value="${param.lang != null ? param.lang : 'ko'}"/>
                               <button type="submit" class="btn btn-sm btn-danger">삭제</button>
                             </form>
                           </div>

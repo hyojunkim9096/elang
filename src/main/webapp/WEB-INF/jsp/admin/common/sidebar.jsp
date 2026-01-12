@@ -1,25 +1,30 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="langParam" value="${not empty adminLang ? adminLang : 'ko'}"/>
+<!-- Sidebar Toggle Button -->
+<button class="sidebar-toggle" id="sidebarToggle" title="사이드바 접기/펼치기">
+  <span id="toggleIcon">◀</span>
+</button>
 <!-- Sidebar -->
-<aside class="admin-sidebar">
+<aside class="admin-sidebar" id="adminSidebar">
   <nav class="sidebar-nav">
     <c:if test="${empty adminMenus}">
       <!-- 기본 메뉴 (DB에 메뉴가 없을 경우) -->
       <div class="nav-section">
         <div class="nav-title">CMS 관리</div>
-        <a href="/admin" class="nav-item ${active == 'dashboard' ? 'active' : ''}">
+        <a href="/admin?lang=${langParam}" class="nav-item ${active == 'dashboard' ? 'active' : ''}">
           <span class="nav-icon">🏠</span>
           <span class="nav-text">대시보드</span>
         </a>
-        <a href="/admin/layout" class="nav-item ${active == 'layout' ? 'active' : ''}">
+        <a href="/admin/layout?lang=${langParam}" class="nav-item ${active == 'layout' ? 'active' : ''}">
           <span class="nav-icon">🎨</span>
           <span class="nav-text">레이아웃 관리</span>
         </a>
-        <a href="/admin/menus" class="nav-item ${active == 'menus' ? 'active' : ''}">
+        <a href="/admin/menus?lang=${langParam}" class="nav-item ${active == 'menus' ? 'active' : ''}">
           <span class="nav-icon">📋</span>
           <span class="nav-text">메뉴 관리</span>
         </a>
-        <a href="/admin/banners" class="nav-item ${active == 'banners' ? 'active' : ''}">
+        <a href="/admin/banners?lang=${langParam}" class="nav-item ${active == 'banners' ? 'active' : ''}">
           <span class="nav-icon">🖼️</span>
           <span class="nav-text">배너 관리</span>
         </a>
@@ -27,11 +32,11 @@
 
       <div class="nav-section">
         <div class="nav-title">컨텐츠</div>
-        <a href="/admin/content-categories" class="nav-item ${active == 'content-categories' ? 'active' : ''}">
+        <a href="/admin/content-categories?lang=${langParam}" class="nav-item ${active == 'content-categories' ? 'active' : ''}">
           <span class="nav-icon">📁</span>
           <span class="nav-text">카테고리</span>
         </a>
-        <a href="/admin/content-pages" class="nav-item ${active == 'content-pages' ? 'active' : ''}">
+        <a href="/admin/content-pages?lang=${langParam}" class="nav-item ${active == 'content-pages' ? 'active' : ''}">
           <span class="nav-icon">📄</span>
           <span class="nav-text">컨텐츠 페이지</span>
         </a>
@@ -39,11 +44,11 @@
 
       <div class="nav-section">
         <div class="nav-title">게시판</div>
-        <a href="/admin/board-categories" class="nav-item ${active == 'board-categories' ? 'active' : ''}">
+        <a href="/admin/board-categories?lang=${langParam}" class="nav-item ${active == 'board-categories' ? 'active' : ''}">
           <span class="nav-icon">📁</span>
           <span class="nav-text">카테고리</span>
         </a>
-        <a href="/admin/board-posts" class="nav-item ${active == 'board-posts' ? 'active' : ''}">
+        <a href="/admin/board-posts?lang=${langParam}" class="nav-item ${active == 'board-posts' ? 'active' : ''}">
           <span class="nav-icon">📝</span>
           <span class="nav-text">게시글</span>
         </a>
@@ -51,9 +56,21 @@
 
       <div class="nav-section">
         <div class="nav-title">고객관리</div>
-        <a href="/admin/inquiries" class="nav-item ${active == 'inquiries' ? 'active' : ''}">
+        <a href="/admin/inquiries?lang=${langParam}" class="nav-item ${active == 'inquiries' ? 'active' : ''}">
           <span class="nav-icon">💬</span>
           <span class="nav-text">문의 관리</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-title">설정</div>
+        <a href="/admin/users?lang=${langParam}" class="nav-item ${active == '/admin/users' ? 'active' : ''}">
+          <span class="nav-icon">👤</span>
+          <span class="nav-text">관리자 계정</span>
+        </a>
+        <a href="/admin/access?lang=${langParam}" class="nav-item ${active == '/admin/access' ? 'active' : ''}">
+          <span class="nav-icon">🔐</span>
+          <span class="nav-text">접근 설정</span>
         </a>
       </div>
     </c:if>
@@ -69,7 +86,7 @@
             <c:forEach var="menu" items="${adminMenus}">
               <c:if test="${menu.parentId != null && menu.parentId == rootMenu.id}">
                 <div class="nav-item-wrapper">
-                  <a href="${menu.href}" class="nav-item ${active == menu.href ? 'active' : ''}">
+                  <a href="${menu.href}?lang=${langParam}" class="nav-item ${active == menu.href ? 'active' : ''}">
                     <span class="nav-icon">📄</span>
                     <span class="nav-text">${menu.label}</span>
                   </a>
@@ -83,7 +100,7 @@
                 <!-- 2뎁스 메뉴의 자식들 표시 (들여쓰기) -->
                 <c:forEach var="subMenu" items="${adminMenus}">
                   <c:if test="${subMenu.parentId != null && subMenu.parentId == menu.id}">
-                    <a href="${subMenu.href}" class="nav-item nav-item-sub ${active == subMenu.href ? 'active' : ''}">
+                    <a href="${subMenu.href}?lang=${langParam}" class="nav-item nav-item-sub ${active == subMenu.href ? 'active' : ''}">
                       <span class="nav-icon">└</span>
                       <span class="nav-text">${subMenu.label}</span>
                     </a>
@@ -130,6 +147,32 @@
 </style>
 
 <script>
+// 사이드바 접기/펼치기
+(function() {
+  const sidebar = document.getElementById('adminSidebar');
+  const toggleBtn = document.getElementById('sidebarToggle');
+  const toggleIcon = document.getElementById('toggleIcon');
+
+  // 로컬 스토리지에서 상태 복원
+  const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  if (isCollapsed) {
+    sidebar.classList.add('collapsed');
+    toggleBtn.classList.add('collapsed');
+    document.body.classList.add('sidebar-collapsed');
+    toggleIcon.textContent = '▶';
+  }
+
+  toggleBtn.addEventListener('click', function() {
+    sidebar.classList.toggle('collapsed');
+    toggleBtn.classList.toggle('collapsed');
+    document.body.classList.toggle('sidebar-collapsed');
+
+    const nowCollapsed = sidebar.classList.contains('collapsed');
+    toggleIcon.textContent = nowCollapsed ? '▶' : '◀';
+    localStorage.setItem('sidebarCollapsed', nowCollapsed);
+  });
+})();
+
 function toggleFavorite(menuId, btn) {
   const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '${_csrf.token}';
   const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || '${_csrf.headerName}';

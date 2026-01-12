@@ -34,6 +34,16 @@ public class SiteMenuService {
         return list.stream().map(this::toRes).toList();
     }
 
+    @Transactional(readOnly = true)
+    public MenuRes findById(Long id) {
+        return repository.findById(id).map(this::toRes).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MenuRes> listAll() {
+        return repository.findAll().stream().map(this::toRes).toList();
+    }
+
     @Transactional
     public MenuRes create(MenuUpsertReq req) {
         if (req == null) throw new BadRequestException("요청 바디가 비어있습니다.");

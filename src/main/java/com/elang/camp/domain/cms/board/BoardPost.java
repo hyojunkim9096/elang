@@ -53,6 +53,10 @@ public class BoardPost {
     @Column(nullable = false)
     private Boolean enabled = true;
 
+    /** 댓글 허용 여부 */
+    @Column(name = "comments_enabled", nullable = false)
+    private Boolean commentsEnabled = true;
+
     /** 게시일 */
     @Column(name = "published_at")
     private LocalDateTime publishedAt;

@@ -90,6 +90,15 @@
       </div>
 
       <div class="form-group">
+        <label>
+          <input type="checkbox" name="commentsEnabled" value="1"
+                 ${empty post or post.commentsEnabled ? 'checked' : ''}/>
+          댓글 허용
+        </label>
+        <small class="hint">체크 해제 시 이 게시글에 댓글을 달 수 없습니다</small>
+      </div>
+
+      <div class="form-group">
         <label>본문<span class="required">*</span></label>
         <div id="editor" style="min-height: 400px; background: white;"></div>
         <input type="hidden" name="content" id="hiddenContent" value=""/>

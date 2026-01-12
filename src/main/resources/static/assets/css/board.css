@@ -296,32 +296,44 @@
     color: #6b7280;
   }
 
-  /* 카드형 모바일 */
+  /* 카드형 모바일 - 가로 레이아웃 유지 (작은 이미지 + 내용 옆) */
   .card-list {
-    gap: 16px;
+    gap: 12px;
     padding: 0 16px;
   }
 
   .card-link {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .card-thumbnail {
-    width: 100%;
-    height: 180px;
+    width: 100px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
   }
 
   .card-content {
-    padding: 16px;
+    padding: 8px 12px;
+    flex: 1;
+    min-width: 0;
   }
 
   .card-title {
-    font-size: 1.1rem;
-    margin-bottom: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .card-text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .card-item {
+    border-radius: 10px;
   }
 
   /* 썸네일형 모바일 */
@@ -391,23 +403,29 @@
     font-size: 0.95rem;
   }
 
+  /* 카드형 480px - 가로 레이아웃 유지 */
   .card-list {
-    gap: 12px;
+    gap: 10px;
   }
 
   .card-thumbnail {
-    height: 160px;
+    width: 80px;
+    height: 64px;
   }
 
   .card-content {
-    padding: 14px;
+    padding: 6px 10px;
   }
 
   .card-title {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
-  /* 썸네일형: 1열 레이아웃 */
+  .card-text {
+    font-size: 0.75rem;
+  }
+
+  /* 썸네일형: 1열 레이아웃 (이미지 크게 + 내용 아래) */
   .thumbnail-list {
     grid-template-columns: 1fr;
     gap: 16px;

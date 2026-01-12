@@ -30,6 +30,8 @@ public class BoardPostUpsertReq {
     @NotNull
     private Boolean enabled;
 
+    private Boolean commentsEnabled = true;
+
     private LocalDateTime publishedAt;
 
     // 첨부파일 IDs (쉼표로 구분된 문자열)

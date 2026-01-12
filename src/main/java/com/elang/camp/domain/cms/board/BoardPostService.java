@@ -80,6 +80,7 @@ public class BoardPostService {
         post.setThumbnail(req.getThumbnail());
         post.setIsPinned(req.getIsPinned());
         post.setEnabled(req.getEnabled());
+        post.setCommentsEnabled(req.getCommentsEnabled() != null ? req.getCommentsEnabled() : true);
         post.setPublishedAt(req.getPublishedAt());
 
         log.debug("Before save - post.thumbnail: {}", post.getThumbnail());
@@ -128,6 +129,7 @@ public class BoardPostService {
         post.setThumbnail(req.getThumbnail());
         post.setIsPinned(req.getIsPinned());
         post.setEnabled(req.getEnabled());
+        post.setCommentsEnabled(req.getCommentsEnabled() != null ? req.getCommentsEnabled() : true);
         post.setPublishedAt(req.getPublishedAt());
 
         log.debug("Before save - post.thumbnail: {}", post.getThumbnail());

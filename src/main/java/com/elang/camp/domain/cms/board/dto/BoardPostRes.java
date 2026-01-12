@@ -19,6 +19,8 @@ public class BoardPostRes {
     private Integer viewCount;
     private Boolean isPinned;
     private Boolean enabled;
+    private Boolean commentsEnabled;
+    private Long commentCount;
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -34,6 +36,10 @@ public class BoardPostRes {
     }
 
     public static BoardPostRes from(BoardPost entity) {
+        return from(entity, 0L);
+    }
+
+    public static BoardPostRes from(BoardPost entity, Long commentCount) {
         return new BoardPostRes(
             entity.getId(),
             entity.getCategoryId(),
@@ -44,6 +50,8 @@ public class BoardPostRes {
             entity.getViewCount(),
             entity.getIsPinned(),
             entity.getEnabled(),
+            entity.getCommentsEnabled(),
+            commentCount,
             entity.getPublishedAt(),
             entity.getCreatedAt(),
             entity.getUpdatedAt()

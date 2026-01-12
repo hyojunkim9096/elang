@@ -14,6 +14,11 @@
 <!-- Header -->
 <header class="admin-header">
   <div class="header-content">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="메뉴">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
     <div class="logo">CMS Admin</div>
     <div class="header-actions">
       <div class="lang-switcher">
@@ -63,6 +68,13 @@
   background: #3b82f6;
   color: white;
 }
+
+@media (max-width: 768px) {
+  .lang-switcher {
+    display: none;
+  }
+}
 </style>
 
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="admin-container">

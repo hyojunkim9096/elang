@@ -32,7 +32,7 @@ public class BoardCommentController {
     public ApiResponse<BoardCommentRes> create(@RequestBody BoardCommentReq req) {
         try {
             return ApiResponse.ok(commentService.create(req));
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             return ApiResponse.fail(e.getMessage());
         }
     }

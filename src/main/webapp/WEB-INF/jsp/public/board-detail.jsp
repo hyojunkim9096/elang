@@ -267,7 +267,7 @@ function loadComments() {
   fetch('/api/comments/post/' + postId)
     .then(res => res.json())
     .then(data => {
-      if (data.success) {
+      if (data.ok) {
         renderComments(data.data);
       }
     })
@@ -300,50 +300,53 @@ function renderComments(comments) {
   list.innerHTML = comments.map(c => renderComment(c)).join('');
 }
 
-function renderComment(comment, isReply = false) {
-  const dateStr = new Date(comment.createdAt).toLocaleDateString();
-  const contentClass = comment.isDeleted ? 'comment-content deleted' : 'comment-content';
-  const content = comment.isDeleted ? i18n.deleted : escapeHtml(comment.content);
+function renderComment(comment, isReply) {
+  isReply = isReply || false;
+  var dateStr = new Date(comment.createdAt).toLocaleDateString();
+  var contentClass = comment.isDeleted ? 'comment-content deleted' : 'comment-content';
+  var contentText = comment.isDeleted ? i18n.deleted : escapeHtml(comment.content);
 
-  let repliesHtml = '';
+  var repliesHtml = '';
   if (comment.replies && comment.replies.length > 0) {
     repliesHtml = '<div class="reply-list">' +
-      comment.replies.map(r => renderComment(r, true)).join('') +
+      comment.replies.map(function(r) { return renderComment(r, true); }).join('') +
       '</div>';
   }
 
-  const actionsHtml = comment.isDeleted ? '' : `
-    <div class="comment-actions">
-      ${!isReply ? '<button onclick="showReplyForm(' + comment.id + ')">' + i18n.reply + '</button>' : ''}
-      <button onclick="editComment(' + comment.id + ')">${i18n.edit}</button>
-      <button onclick="deleteComment(' + comment.id + ')">${i18n.delete}</button>
-    </div>
-  `;
+  var actionsHtml = '';
+  if (!comment.isDeleted) {
+    actionsHtml = '<div class="comment-actions">';
+    if (!isReply) {
+      actionsHtml += '<button onclick="showReplyForm(' + comment.id + ')">' + i18n.reply + '</button>';
+    }
+    actionsHtml += '<button onclick="editComment(' + comment.id + ')">' + i18n.edit + '</button>';
+    actionsHtml += '<button onclick="deleteComment(' + comment.id + ')">' + i18n.delete + '</button>';
+    actionsHtml += '</div>';
+  }
 
-  return `
-    <li class="comment-item" id="comment-${comment.id}">
-      <div class="comment-header">
-        <span class="comment-author">${escapeHtml(comment.authorName)}</span>
-        <span class="comment-date">${dateStr}</span>
-      </div>
-      <div class="${contentClass}" id="content-${comment.id}">${content}</div>
-      ${actionsHtml}
-      <div id="reply-form-${comment.id}"></div>
-      ${repliesHtml}
-    </li>
-  `;
+  return '<li class="comment-item" id="comment-' + comment.id + '">' +
+    '<div class="comment-header">' +
+    '<span class="comment-author">' + escapeHtml(comment.authorName) + '</span>' +
+    '<span class="comment-date">' + dateStr + '</span>' +
+    '</div>' +
+    '<div class="' + contentClass + '" id="content-' + comment.id + '">' + contentText + '</div>' +
+    actionsHtml +
+    '<div id="reply-form-' + comment.id + '"></div>' +
+    repliesHtml +
+    '</li>';
 }
 
-function submitComment(parentId = null) {
-  const nameInput = parentId ? document.getElementById('reply-name-' + parentId) : document.getElementById('authorName');
-  const pwInput = parentId ? document.getElementById('reply-pw-' + parentId) : document.getElementById('password');
-  const contentInput = parentId ? document.getElementById('reply-content-' + parentId) : document.getElementById('commentContent');
+function submitComment(parentId) {
+  parentId = parentId || null;
+  var nameInput = parentId ? document.getElementById('reply-name-' + parentId) : document.getElementById('authorName');
+  var pwInput = parentId ? document.getElementById('reply-pw-' + parentId) : document.getElementById('password');
+  var contentInput = parentId ? document.getElementById('reply-content-' + parentId) : document.getElementById('commentContent');
 
-  const authorName = nameInput.value.trim();
-  const password = pwInput.value;
-  const content = contentInput.value.trim();
+  var authorName = nameInput.value.trim();
+  var pw = pwInput.value;
+  var contentVal = contentInput.value.trim();
 
-  if (!authorName || !content) {
+  if (!authorName || !contentVal) {
     alert(lang === 'ko' ? '이름과 내용을 입력해주세요.' : 'Please enter name and content.');
     return;
   }
@@ -355,14 +358,13 @@ function submitComment(parentId = null) {
       postId: postId,
       parentId: parentId,
       authorName: authorName,
-      password: password,
-      content: content
+      password: pw,
+      content: contentVal
     })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      // Clear form
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.ok) {
       if (!parentId) {
         nameInput.value = '';
         pwInput.value = '';
@@ -375,27 +377,25 @@ function submitComment(parentId = null) {
       alert(data.message || 'Failed to post comment');
     }
   })
-  .catch(err => {
+  .catch(function(err) {
     console.error('Error:', err);
     alert('Error posting comment');
   });
 }
 
 function showReplyForm(parentId) {
-  const container = document.getElementById('reply-form-' + parentId);
-  container.innerHTML = `
-    <div class="reply-form">
-      <div class="comment-form-row">
-        <input type="text" id="reply-name-${parentId}" placeholder="${i18n.name}" required maxlength="50"/>
-        <input type="password" id="reply-pw-${parentId}" placeholder="${i18n.password}" maxlength="20"/>
-      </div>
-      <textarea id="reply-content-${parentId}" placeholder="${i18n.content}" required></textarea>
-      <div style="margin-top: 10px; text-align: right;">
-        <button type="button" onclick="hideReplyForm(${parentId})" style="background: #6c757d;">${i18n.cancel}</button>
-        <button type="button" onclick="submitComment(${parentId})">${i18n.submit}</button>
-      </div>
-    </div>
-  `;
+  var container = document.getElementById('reply-form-' + parentId);
+  container.innerHTML = '<div class="reply-form">' +
+    '<div class="comment-form-row">' +
+    '<input type="text" id="reply-name-' + parentId + '" placeholder="' + i18n.name + '" required maxlength="50"/>' +
+    '<input type="password" id="reply-pw-' + parentId + '" placeholder="' + i18n.password + '" maxlength="20"/>' +
+    '</div>' +
+    '<textarea id="reply-content-' + parentId + '" placeholder="' + i18n.content + '" required></textarea>' +
+    '<div style="margin-top: 10px; text-align: right;">' +
+    '<button type="button" onclick="hideReplyForm(' + parentId + ')" style="background: #6c757d;">' + i18n.cancel + '</button>' +
+    '<button type="button" onclick="submitComment(' + parentId + ')">' + i18n.submit + '</button>' +
+    '</div>' +
+    '</div>';
 }
 
 function hideReplyForm(parentId) {
@@ -419,7 +419,7 @@ function editComment(commentId) {
   })
   .then(res => res.json())
   .then(data => {
-    if (data.success) {
+    if (data.ok) {
       loadComments();
     } else {
       alert(data.message || 'Failed to edit comment');
@@ -439,7 +439,7 @@ function deleteComment(commentId) {
   })
   .then(res => res.json())
   .then(data => {
-    if (data.success) {
+    if (data.ok) {
       loadComments();
     } else {
       alert(data.message || 'Failed to delete comment');

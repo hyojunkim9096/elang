@@ -53,7 +53,9 @@ public class SecurityConfig {
                     new AntPathRequestMatcher("/uploads/**"),
                     new AntPathRequestMatcher("/favicon.ico"),
                     // 언어 코드가 포함된 모든 공개 경로 허용
-                    new AntPathRequestMatcher("/{lang:(?:ko|en)}/**")
+                    new AntPathRequestMatcher("/{lang:(?:ko|en)}/**"),
+                    // 공개 댓글 API
+                    new AntPathRequestMatcher("/api/comments/**")
                 ).permitAll()
                 // 관리자 페이지는 ADMIN 역할 필요
                 .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")

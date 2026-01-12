@@ -1226,33 +1226,36 @@ body.home-page .main-content {
   min-height: calc(100vh - 200px);
 }
 
-/* ===== Banner Slider Styles (Corrected) ===== */
+/* ===== Banner Slider Styles (PC: 좌우 배치) ===== */
 .hero-banner {
   position: relative;
-  height: 100vh;
+  display: flex;
+  flex-direction: row-reverse; /* 슬라이더를 오른쪽, 콘텐츠를 왼쪽으로 */
+  min-height: 600px;
   max-height: 800px;
   background: var(--dark);
   overflow: hidden;
 }
 
-.banner-slider {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* PC: 왼쪽 히어로 콘텐츠 영역 */
+.hero-banner .hero-content {
+  position: relative;
+  z-index: 10;
+  width: 40%;
+  min-width: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 50px;
+  text-align: left;
+  background: var(--dark);
 }
 
-/* Hero Content - 배너 중앙 배치 */
-.hero-banner .hero-content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  width: 100%;
-  padding: 0 24px;
-  text-align: center;
+/* PC: 오른쪽 배너 슬라이더 영역 */
+.banner-slider {
+  position: relative;
+  flex: 1;
+  min-height: 100%;
 }
 
 .hero-banner .hero-overlay {
@@ -1262,12 +1265,13 @@ body.home-page .main-content {
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.2) 50%,
-    rgba(0, 0, 0, 0.5) 100%
+    to right,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.2) 100%
   );
   z-index: 5;
+  pointer-events: none;
 }
 
 .hero-banner .slider-controls {
@@ -1967,11 +1971,17 @@ body.home-page .main-content {
     left: auto;
     transform: none;
     width: 100%;
+    min-width: unset;
     max-width: 100%;
     padding: 30px 20px;
     background: var(--dark);
     text-align: center;
     z-index: 10;
+    order: 1; /* 배너 아래에 표시 */
+  }
+
+  .hero-banner .banner-slider {
+    order: 0; /* 배너를 먼저 표시 */
   }
 
   .hero-banner .slider-controls {

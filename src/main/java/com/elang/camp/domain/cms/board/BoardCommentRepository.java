@@ -23,4 +23,7 @@ public interface BoardCommentRepository extends JpaRepository<BoardComment, Long
 
     /** 게시글 삭제 시 관련 댓글 모두 삭제 */
     void deleteByPostId(Long postId);
+
+    /** 모든 댓글 조회 (최신순) - 관리자용 */
+    List<BoardComment> findAllByOrderByCreatedAtDesc();
 }

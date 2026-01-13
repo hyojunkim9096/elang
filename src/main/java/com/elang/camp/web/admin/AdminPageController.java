@@ -26,6 +26,8 @@ import com.elang.camp.domain.cms.inquiry.InquiryService;
 import com.elang.camp.domain.cms.inquiry.InquiryStatus;
 import com.elang.camp.domain.cms.inquiry.dto.InquiryRes;
 import com.elang.camp.domain.cms.inquiry.dto.InquiryUpdateReq;
+import com.elang.camp.domain.cms.board.BoardCommentService;
+import com.elang.camp.domain.cms.board.dto.BoardCommentRes;
 import com.elang.camp.domain.file.AttachFile;
 import com.elang.camp.domain.file.AttachFileService;
 import com.elang.camp.domain.cms.banner.BannerType;
@@ -53,6 +55,7 @@ public class AdminPageController {
     private final SiteMenuService menuService;
     private final BoardCategoryService boardCategoryService;
     private final BoardPostService boardPostService;
+    private final BoardCommentService boardCommentService;
     private final ContentPageService contentPageService;
     private final ContentCategoryService contentCategoryService;
     private final SiteBannerService bannerService;
@@ -541,16 +544,16 @@ public class AdminPageController {
                                @RequestParam Long categoryId,
                                @RequestParam String categoryKey,
                                @RequestParam(required = false, defaultValue = "0") Integer isPinned,
-                               @RequestParam(required = false, defaultValue = "1") Integer enabled,
-                               @RequestParam(required = false, defaultValue = "1") Integer commentsEnabled,
+                               @RequestParam(required = false, defaultValue = "0") Integer enabled,
+                               @RequestParam(required = false, defaultValue = "0") Integer commentsEnabled,
                                RedirectAttributes redirectAttributes) {
         log.debug("saveBoardPost called - thumbnail: {}, title: {}, categoryId: {}",
                   req.getThumbnail(), req.getTitle(), req.getCategoryId());
 
-        // 체크박스 값 설정
-        req.setIsPinned(isPinned != null && isPinned == 1);
-        req.setEnabled(enabled == null || enabled == 1);
-        req.setCommentsEnabled(commentsEnabled == null || commentsEnabled == 1);
+        // 체크박스 값 설정 (체크 해제 시 파라미터가 전송되지 않으므로 defaultValue=0)
+        req.setIsPinned(isPinned == 1);
+        req.setEnabled(enabled == 1);
+        req.setCommentsEnabled(commentsEnabled == 1);
 
         if (id != null) {
             boardPostService.update(id, req);
@@ -627,5 +630,51 @@ public class AdminPageController {
         inquiryService.delete(id);
         redirectAttributes.addFlashAttribute("message", "문의가 삭제되었습니다.");
         return "redirect:/admin/inquiries";
+    }
+
+    // ==================== 댓글 관리 ====================
+
+    @GetMapping("/admin/comments")
+    public String comments(@RequestParam(required = false) Long postId,
+                          @RequestParam(required = false) Long categoryId,
+                          @RequestParam(required = false) String categoryKey,
+                          @RequestParam(required = false, defaultValue = "ko") String lang,
+                          Model model) {
+        addCommonAttributes(model, "댓글 관리", "comments", lang);
+
+        List<BoardCommentRes> comments;
+        if (postId != null) {
+            // 특정 게시글의 댓글만 조회
+            comments = boardCommentService.listByPostId(postId);
+            BoardPostRes post = boardPostService.getById(postId);
+            model.addAttribute("post", post);
+            model.addAttribute("postId", postId);
+            model.addAttribute("categoryId", categoryId);
+            model.addAttribute("categoryKey", categoryKey);
+        } else {
+            // 전체 댓글 조회
+            comments = boardCommentService.listAll();
+        }
+        model.addAttribute("comments", comments);
+        model.addAttribute("totalCount", comments.size());
+
+        return "admin/comments/list";
+    }
+
+    @PostMapping("/admin/comments/{id}/delete")
+    public String deleteComment(@PathVariable Long id,
+                               @RequestParam(required = false) Long postId,
+                               @RequestParam(required = false) Long categoryId,
+                               @RequestParam(required = false) String categoryKey,
+                               RedirectAttributes redirectAttributes) {
+        boardCommentService.deleteByAdmin(id);
+        redirectAttributes.addFlashAttribute("message", "댓글이 삭제되었습니다.");
+
+        if (postId != null) {
+            return "redirect:/admin/comments?postId=" + postId +
+                   (categoryId != null ? "&categoryId=" + categoryId : "") +
+                   (categoryKey != null ? "&categoryKey=" + categoryKey : "");
+        }
+        return "redirect:/admin/comments";
     }
 }

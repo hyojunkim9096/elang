@@ -27,6 +27,11 @@ public class BoardCommentService {
     public List<BoardCommentRes> listByPostId(Long postId) {
         List<BoardComment> allComments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
 
+        // 게시글 제목 조회
+        String postTitle = postRepository.findById(postId)
+                .map(BoardPost::getTitle)
+                .orElse(null);
+
         // 댓글을 parentId별로 그룹화
         Map<Long, List<BoardComment>> childrenMap = allComments.stream()
                 .filter(c -> c.getParentId() != null)
@@ -35,7 +40,7 @@ public class BoardCommentService {
         // 루트 댓글만 추출하여 계층 구조로 변환
         return allComments.stream()
                 .filter(c -> c.getParentId() == null)
-                .map(c -> toResWithReplies(c, childrenMap))
+                .map(c -> toResWithReplies(c, childrenMap, postTitle))
                 .toList();
     }
 
@@ -86,7 +91,7 @@ public class BoardCommentService {
     }
 
     /**
-     * 댓글 삭제 (소프트 삭제)
+     * 댓글 삭제 (답글 포함 소프트 삭제)
      */
     @Transactional
     public void delete(Long id, String password) {
@@ -98,14 +103,21 @@ public class BoardCommentService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 대댓글이 있으면 소프트 삭제, 없으면 하드 삭제
-        List<BoardComment> replies = commentRepository.findByParentIdOrderByCreatedAtAsc(id);
-        if (!replies.isEmpty()) {
-            comment.setIsDeleted(true);
-            comment.setContent("삭제된 댓글입니다.");
-        } else {
-            commentRepository.delete(comment);
+        // 댓글과 모든 답글을 소프트 삭제 (내용 보존)
+        softDeleteWithReplies(comment);
+    }
+
+    /**
+     * 댓글과 하위 답글 모두 소프트 삭제 (재귀)
+     */
+    private void softDeleteWithReplies(BoardComment comment) {
+        // 답글들도 소프트 삭제
+        List<BoardComment> replies = commentRepository.findByParentIdOrderByCreatedAtAsc(comment.getId());
+        for (BoardComment reply : replies) {
+            softDeleteWithReplies(reply);
         }
+        // 본인 소프트 삭제
+        comment.setIsDeleted(true);
     }
 
     /**
@@ -130,20 +142,15 @@ public class BoardCommentService {
     }
 
     /**
-     * 관리자용 댓글 삭제 (비밀번호 확인 없음)
+     * 관리자용 댓글 삭제 (비밀번호 확인 없음, 답글 포함)
      */
     @Transactional
     public void deleteByAdmin(Long id) {
         BoardComment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
-        List<BoardComment> replies = commentRepository.findByParentIdOrderByCreatedAtAsc(id);
-        if (!replies.isEmpty()) {
-            comment.setIsDeleted(true);
-            comment.setContent("삭제된 댓글입니다.");
-        } else {
-            commentRepository.delete(comment);
-        }
+        // 댓글과 모든 답글을 소프트 삭제 (내용 보존)
+        softDeleteWithReplies(comment);
     }
 
     /**
@@ -152,6 +159,24 @@ public class BoardCommentService {
     @Transactional(readOnly = true)
     public long countByPostId(Long postId) {
         return commentRepository.countByPostId(postId);
+    }
+
+    /**
+     * 모든 댓글 목록 조회 (관리자용)
+     */
+    @Transactional(readOnly = true)
+    public List<BoardCommentRes> listAll() {
+        List<BoardComment> comments = commentRepository.findAllByOrderByCreatedAtDesc();
+        return comments.stream()
+                .map(c -> {
+                    BoardCommentRes res = toRes(c);
+                    // 게시글 제목 조회
+                    postRepository.findById(c.getPostId()).ifPresent(post -> {
+                        res.setPostTitle(post.getTitle());
+                    });
+                    return res;
+                })
+                .toList();
     }
 
     private BoardCommentRes toRes(BoardComment comment) {
@@ -169,12 +194,16 @@ public class BoardCommentService {
     }
 
     private BoardCommentRes toResWithReplies(BoardComment comment, Map<Long, List<BoardComment>> childrenMap) {
+        return toResWithReplies(comment, childrenMap, null);
+    }
+
+    private BoardCommentRes toResWithReplies(BoardComment comment, Map<Long, List<BoardComment>> childrenMap, String postTitle) {
         List<BoardCommentRes> replies = childrenMap.getOrDefault(comment.getId(), new ArrayList<>())
                 .stream()
-                .map(c -> toResWithReplies(c, childrenMap))
+                .map(c -> toResWithReplies(c, childrenMap, postTitle))
                 .toList();
 
-        return BoardCommentRes.builder()
+        BoardCommentRes res = BoardCommentRes.builder()
                 .id(comment.getId())
                 .postId(comment.getPostId())
                 .parentId(comment.getParentId())
@@ -185,5 +214,7 @@ public class BoardCommentService {
                 .updatedAt(comment.getUpdatedAt())
                 .replies(replies)
                 .build();
+        res.setPostTitle(postTitle);
+        return res;
     }
 }

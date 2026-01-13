@@ -5,6 +5,7 @@ import com.elang.camp.domain.cms.board.BoardCommentService;
 import com.elang.camp.domain.cms.board.dto.BoardCommentReq;
 import com.elang.camp.domain.cms.board.dto.BoardCommentRes;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -71,6 +72,7 @@ public class BoardCommentController {
     /**
      * 관리자용 댓글 삭제
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/{id}")
     public ApiResponse<Void> deleteByAdmin(@PathVariable Long id) {
         commentService.deleteByAdmin(id);

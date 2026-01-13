@@ -10,8 +10,12 @@ import com.elang.camp.domain.cms.board.dto.BoardPostRes; // 빠진 import 구문
 import com.elang.camp.domain.cms.inquiry.InquiryService;
 import com.elang.camp.domain.cms.inquiry.dto.InquiryCreateReq;
 import com.elang.camp.domain.cms.inquiry.dto.InquiryRes;
+import com.elang.camp.domain.file.AttachFile;
+import com.elang.camp.domain.file.AttachFileService;
 import com.elang.camp.common.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +32,7 @@ public class PublicController {
     private final BannerCategoryService bannerCategoryService;
     private final BoardPostService boardPostService;
     private final InquiryService inquiryService;
+    private final AttachFileService attachFileService;
 
     @GetMapping({"/", ""})
     public String root() {
@@ -71,14 +76,24 @@ public class PublicController {
     public String boardDetail(@PathVariable String lang,
                              @PathVariable String categoryKey,
                              @PathVariable Long postId,
+                             Authentication authentication,
                              Model model) {
         BoardPostRes post = boardPostService.getById(postId);
 
         // 조회수 증가
         boardPostService.incrementViewCount(postId);
 
+        // 관리자 여부 확인
+        boolean isAdmin = authentication != null &&
+                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+        // 첨부파일 조회
+        List<AttachFile> attachments = attachFileService.listByReference("board_post_attachment", postId);
+
         model.addAttribute("categoryKey", categoryKey);
         model.addAttribute("post", post);
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("attachments", attachments);
 
         return "public/board-detail";
     }

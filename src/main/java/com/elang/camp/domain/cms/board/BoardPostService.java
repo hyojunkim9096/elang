@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class BoardPostService {
 
     private final BoardPostRepository boardPostRepository;
+    private final BoardCommentRepository commentRepository;
     private final AttachFileService attachFileService;
 
     public List<BoardPostRes> listByCategoryId(Long categoryId, Boolean enabledOnly, String searchType, String keyword) {
@@ -45,7 +46,7 @@ public class BoardPostService {
         }
 
         return posts.stream()
-            .map(BoardPostRes::from)
+            .map(post -> BoardPostRes.from(post, commentRepository.countByPostId(post.getId())))
             .collect(Collectors.toList());
     }
 
@@ -57,7 +58,7 @@ public class BoardPostService {
     public List<BoardPostRes> listByCategoryIdAndLang(Long categoryId, String lang) {
         return boardPostRepository.findByCategoryIdAndLangAndEnabledOrderByIsPinnedDescPublishedAtDesc(categoryId, lang, true)
             .stream()
-            .map(BoardPostRes::from)
+            .map(post -> BoardPostRes.from(post, commentRepository.countByPostId(post.getId())))
             .collect(Collectors.toList());
     }
 

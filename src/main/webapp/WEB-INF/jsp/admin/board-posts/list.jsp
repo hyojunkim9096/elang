@@ -76,11 +76,11 @@
                 <th style="width:60px;">ID</th>
                 <th style="width:80px;">언어</th>
                 <th>제목</th>
-                <th style="width:100px;">조회수</th>
-                <th style="width:90px;">고정</th>
-                <th style="width:90px;">활성화</th>
-                <th style="width:180px;">작성일</th>
-                <th style="width:180px;">작업</th>
+                <th style="width:80px;">조회수</th>
+                <th style="width:70px;">고정</th>
+                <th style="width:80px;">활성화</th>
+                <th style="width:140px;">작성일</th>
+                <th style="width:200px;">작업</th>
               </tr>
             </thead>
             <tbody>
@@ -108,11 +108,14 @@
                       </c:otherwise>
                     </c:choose>
                   </td>
-                  <td>
+                  <td style="font-size: 13px;">
                     <fmt:formatDate value="${post.publishedAt}" pattern="yyyy-MM-dd HH:mm"/>
                   </td>
                   <td>
                     <a href="/admin/board-posts/${post.id}/edit?categoryId=${categoryId}&categoryKey=${categoryKey}" class="btn btn-sm btn-secondary">✏️ 수정</a>
+                    <c:if test="${post.commentCount > 0}">
+                      <a href="/admin/comments?postId=${post.id}&categoryId=${categoryId}&categoryKey=${categoryKey}" class="btn btn-sm btn-primary">💬 ${post.commentCount}</a>
+                    </c:if>
                     <form id="deleteForm${post.id}" action="/admin/board-posts/${post.id}/delete?categoryId=${categoryId}&categoryKey=${categoryKey}" method="post" style="display:inline;">
                       <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                       <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(${post.id})">🗑</button>

@@ -20,9 +20,3 @@ logging:
     root: info
     com.elang.camp: info
 
-# Cafe24 서버 환경에 맞는 파일 업로드 경로 설정
-app:
-  upload-dir: /home/hosting_users/hyojunkim9096/uploads/
-  openai:
-    api-key:
-    model: gpt-4o-mini

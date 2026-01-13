@@ -28,6 +28,10 @@ app:
     password: admin1234
   # 파일 업로드 디렉토리 경로 (사용자 홈 디렉토리 아래 elang-uploads 폴더)
   upload-dir: ${user.home}/elang-uploads/
+  # OpenAI API 설정
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    model: gpt-4o-mini
 
 logging:
   level:

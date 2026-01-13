@@ -24,5 +24,5 @@ logging:
 app:
   upload-dir: /home/hosting_users/hyojunkim9096/uploads/
   openai:
-    api-key: ***REMOVED***
+    api-key: /**REMOVED**/
     model: gpt-4o-mini
